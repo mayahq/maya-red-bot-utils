@@ -12,7 +12,24 @@ module.exports = function (RED) {
       return;
     }
 
-    console.log("intent loaded");
+    console.log(
+      "intent loaded",
+      {
+        node: node,
+        tab: tab,
+        group: group,
+        forwardInputMessages: false,
+        control: {
+          type: "form",
+          label: config.label,
+          order: config.order,
+          value: config.payload || node.id,
+          options: config.options,
+          formValue: config.formValue,
+        },
+      },
+      config.options
+    );
   }
   RED.nodes.registerType("bot-intent", IntentNode);
 };

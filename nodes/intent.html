@@ -1,22 +1,11 @@
 <script type="text/javascript">
     RED.nodes.registerType('bot-intent',{
         category: 'botutils',
-        color: 'rgb(176, 223, 227)',
+        color: '#d8bfd8',
         defaults: {
             name: {value: ''},
             label: {value: ''},
-            group: {type: 'ui_group', required: true},
             order: {value: 0},
-            width: {value: 0, validate: function(v) {
-                    var width = v||0;
-                    var currentGroup = $('#node-input-group').val()||this.group;
-                    var groupNode = RED.nodes.node(currentGroup);
-                    var valid = !groupNode || +width <= +groupNode.width;
-                    $("#node-input-size").toggleClass("input-error",!valid);
-                    return valid;
-                }
-            },
-            height: {value: 0},
             options: {value:[{value:'', label :'', type:'', required:true}], validate:function(value) {
                     if (value.length ) {
                         for (var i = 0; i < value.length; i++) {
@@ -32,23 +21,16 @@
                 }, required:true},
             formValue:{value:{}},
             payload: {value: ''},
-            submit: {value: "submit"},
-            cancel: {value: "cancel"},
-            topic: {value: ''}
+            
         },
         inputs:1,
         outputs:1,
+        icon : "inject.svg",
         paletteLabel: 'bot-intent',
         label: function() { return this.name || this.label || 'bot-intent'; },
         labelStyle: function() { return this.name?"node_label_italic":""; },
         oneditprepare: function() {
-            if ($("#node-input-submit").val() === null) { $("#node-input-submit").val("submit"); }
-            if ($("#node-input-cancel").val() === null) { $("#node-input-cancel").val("cancel"); }
-            $("#node-input-size").elementSizer({
-                width: "#node-input-width",
-                height: "#node-input-height",
-                group: "#node-input-group"
-            });
+
 
             this.resizeRule = function(option,newWidth) {
                 //option.find(".node-input-option-type").width(newWidth);
@@ -174,14 +156,6 @@
                 node.options.push(o);
             });
         },
-        oneditresize: function() {
-            var options = $("#node-input-option-container").children();
-            var newWidth = ($("#node-input-option-container").width() - 175)/2;
-            var node = this;
-            options.each(function(i) {
-                node.resizeRule($(this),newWidth);
-            });
-        }
     });
 </script>
 <script type="text/html" data-template-name="bot-intent">
@@ -243,23 +217,9 @@ input:checked + .slider:before {
     border-radius: 50%;
 }
 </style>
-
-    <div class="form-row">
-        <label for="node-input-group"><i class="fa fa-table"></i> Group</label>
-        <input type="text" id="node-input-group">
-    </div>
-    <div class="form-row">
-        <label><i class="fa fa-object-group"></i> Size</label>
-        <input type="hidden" id="node-input-width">
-        <input type="hidden" id="node-input-height">
-        <button class="editor-button" id="node-input-size"></button>
-    </div>
-    <div class="form-row">
-        <label for="node-input-label"><i class="fa fa-tag"></i> Label</label>
-        <input type="text" id="node-input-label" placeholder="optional label">
-    </div>
+    
     <div class="form-row node-input-option-container-row" style="margin-bottom:0px; width:100%; min-width:520px">
-        <label style="vertical-align:top;"><i class="fa fa-list-alt"></i> Form elements</label>
+        <label style="vertical-align:top;"><i class="fa fa-list-alt"></i> Intent Components</label>
         <div style="display:inline-block; width:78%; border:1px solid #ccc; border-radius:5px; box-sizing:border-box;">
           <div class="red-ui-tray-header" style="width:100%; display: inline-block; padding-top:10px; padding-buttom:10px; border-top:0px solid; border-radius:5px 5px 0 0; border-bottom:1px solid #ccc;">
               <div style="width:94%; display:inline-block; margin-left:27px">
@@ -279,20 +239,21 @@ input:checked + .slider:before {
     <div class="form-row">
         <a href="#" class="editor-button editor-button-small" id="node-input-add-option" style="margin-top: 4px; margin-left: 103px;"><i class="fa fa-plus"></i> <span>element</span></a>
     </div>
-    <div class="form-row">
-        <label for="node-input-submit"><i class="fa fa-square"></i> Buttons</label>
-        <i class="fa fa-thumbs-o-up"></i> <input type="text" id="node-input-submit" placeholder="submit button text" style="width:35%;">
-        <span style="margin-left:16px"><i class="fa fa-thumbs-o-down"></i></span>
-        <input type="text" id="node-input-cancel" placeholder="cancel button text" style="width:35%;">
-    </div>
-    <div class="form-row">
-        <label for="node-input-topic"><i class="fa fa-tasks"></i> Topic</label>
-        <input type="text" id="node-input-topic" placeholder="optional msg.topic">
+    <div class="form-row" style="display:flex">
+        <label for="node-input-intent-preview"><i class="fa fa-tag"></i> Preview</label>
+        <div id="node-input-intent-preview">
+            <p>Search Google for <code>query:string</code></p>
+        </div>
     </div>
     <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
         <input type="text" id="node-input-name">
     </div>
+    <div class="form-row">
+        <label for="node-input-label"><i class="fa fa-tag"></i> Label</label>
+        <input type="text" id="node-input-label" placeholder="optional label">
+    </div>
+    
 </script>
 
 <script type="text/html" data-help-name="bot-intent">
