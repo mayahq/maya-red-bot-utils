@@ -1,0 +1,27 @@
+{
+  "name": "maya-red-bot-utils",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mayahq/maya-red-bot-utils/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mayahq/maya-red-bot-utils"
+  },
+  "keywords": [
+    "bot-utils",
+    "actions"
+  ],
+  "node-red": {
+    "nodes": {
+      "bot-intent": "nodes/intent.js"
+    }
+  }
+}
