@@ -4,9 +4,8 @@
         color: '#d8bfd8',
         defaults: {
             name: {value: ''},
-            label: {value: ''},
             order: {value: 0},
-            options: {value:[{value:'', label :'', type:'', required:true}], validate:function(value) {
+            options: {value:[{value:'', type:'', required:true}], validate:function(value) {
                     if (value.length ) {
                         for (var i = 0; i < value.length; i++) {
                             if (!value[i].value) {
@@ -27,15 +26,31 @@
         outputs:1,
         icon : "inject.svg",
         paletteLabel: 'bot-intent',
-        label: function() { return this.name || this.label || 'bot-intent'; },
+        label: function() { return this.name || 'bot-intent'; },
         labelStyle: function() { return this.name?"node_label_italic":""; },
         oneditprepare: function() {
-
-
+            
             this.resizeRule = function(option,newWidth) {
                 //option.find(".node-input-option-type").width(newWidth);
                 //  option.find(".node-input-option-label").width(newWidth);
                 //  option.find(".node-input-option-value").width(newWidth);
+            }
+
+            // This generates the preview for the intent
+            function generatePreviews(options){
+                var previews = $("#node-input-intent-preview")
+                var htmlElem = "<p>";
+                options.forEach(function(option) {
+                    if (option.type === "prompt"){
+                        htmlElem += "<b> " + option.value + " </b>";
+                    } else {
+                        htmlElem += "<code><b>" + option.value + ":" + option.type + "</b></code>"
+                    }
+                });
+                htmlElem += "</p>"
+                // console.log(htmlElem)
+                $(htmlElem).appendTo(previews)
+                
             }
 
             function generateOption(i, option) {
@@ -46,10 +61,10 @@
 
                 $('<i style="cursor:move; margin-left:3px;" class="node-input-option-handle fa fa-bars"></i>').appendTo(row);
 
-                var labelField = $('<input/>',{class:"node-input-option-label", type:"text", style:"margin-left:7px; width:20%;", placeholder: 'e.g. Name', value:option.label}).appendTo(row);//.typedInput({default:'str',types:['str', 'num']});
+                // var labelField = $('<input/>',{class:"node-input-option-label", type:"text", style:"margin-left:7px; width:20%;", placeholder: 'e.g. Name', value:option.label}).appendTo(row);//.typedInput({default:'str',types:['str', 'num']});
                 var valueClass ="node-input-option-value"
                 if (!option.value) { valueClass ="node-input-option-value input-error"; }
-                var valueField = $('<input/>',{class:valueClass, type:"text", style:"margin-left:7px; width:20%;", placeholder: 'e.g. name', value:option.value}).appendTo(row);//.typedInput({default:'str',types:['str','num','bool']});
+                var valueField = $('<input/>',{class:valueClass, type:"text", style:"margin-left:7px; width:30%;", placeholder: 'e.g. name', value:option.value}).appendTo(row);//.typedInput({default:'str',types:['str','num','bool']});
                 valueField.keyup(function() {
                     if ($(this).val() && $(this).hasClass('input-error')) {
                         $(this).removeClass('input-error')
@@ -62,17 +77,15 @@
 
                 });
                 // var typeField = $('<input/>',{class:"node-input-option-type",type:"text",style:"margin-left: 7px; width: 135px;", placeholder: 'Type', value:option.type}).appendTo(row).typedInput({default:'str',types:['str', 'num']});
-                var typeField = $('<select/>',{class:"node-input-option-type",type:"text",style:"margin-left:7px; width:16%"}).appendTo(row);//.typedInput({default:'str',types:['str', 'num']});
+                var typeField = $('<select/>',{class:"node-input-option-type",type:"text",style:"margin-left:7px; width:25%"}).appendTo(row);//.typedInput({default:'str',types:['str', 'num']});
 
                 var arr = [
-                  {val : "text", text: 'Text'},
-                  {val : "multiline", text: 'Multiline'},
-                  {val : "number", text: 'Number'},
-                  {val : "email", text: 'E-mail'},
-                  {val : "password", text: 'Password'},
-                  {val : "checkbox", text: 'Checkbox'},
-                  {val : "switch", text: 'Switch'},
-                  {val : "date", text: 'Date'}
+                  {val : "prompt", text: 'Intent Prompt'},
+                  {val : "number", text: 'Number Variable'},
+                  {val : "string", text: 'String Variable'},
+                  {val : "email", text: 'E-mail Variable'},
+                  {val : "date", text: 'Date Variable'},
+                   {val : "multiline", text: 'Multiline'},
                 ];
 
                 //var sel = $('<select>').appendTo('body');
@@ -85,16 +98,16 @@
                 });
                
                 //var labelForRequried = $('<span/>',{style:"margin: 10px;"}).text('Required').appendTo(row);
-                var requiredContainer= $('<div/>',{style:"display:inline-block; height:34px; width:13%; vertical-align: middle"}).appendTo(row);
+                var requiredContainer= $('<div/>',{style:"display:inline-block; height:34px; width:18%; vertical-align: middle"}).appendTo(row);
                 var requiredInnerContainer= $('<div/>',{style:"left:35%; position:relative; width:30px"}).appendTo(requiredContainer);
                 var reqRow=$("<label />",{class:"switch",style:"top:10px; width:30px;"}).appendTo(requiredInnerContainer);
                 //var required = $('<input/>',{class:"node-input-option-required",style:"margin: 5px;width:19%",type:"checkbox", checked:option.required}).appendTo(row);//labelForRequried);//.typedInput({default:'str',types:['str', 'num']});
                 var required = $('<input/>',{class:"node-input-option-required", type:"checkbox", checked:option.required, style:"vertical-align:top;"}).appendTo(reqRow);//labelForRequried);//.typedInput({default:'str',types:['str', 'num']});
                 var reqDiv=$("<div />",{class:"slider round"}).appendTo(reqRow);
                 var vis = option.rows ? 'visible' : 'hidden';
-                var rowsField = $('<input/>',{class:"node-input-option-rows", type:"number", style:"width:10%;", placeholder:'Rows', value:option.rows }).css('visibility',vis).appendTo(row);
+                //var rowsField = $('<input/>',{class:"node-input-option-rows", type:"number", style:"width:10%;", placeholder:'Rows', value:option.rows }).css('visibility',vis).appendTo(row);
                
-                var finalspan = $('<div/>',{style:"display:inline-block; width:5%;"}).appendTo(row);
+                var finalspan = $('<div/>',{style:"display:inline-block; width:5%; margin-left:15px;"}).appendTo(row);
                 var deleteButton = $('<a/>',{href:"#",class:"editor-button", style:"font-size:1.3em; left:45%; position:relative;"}).appendTo(finalspan);
                 $('<i/>',{class:"fa fa-trash-o"}).appendTo(deleteButton);
 
@@ -121,6 +134,8 @@
                 $("#node-input-option-container").append(container);
             }
 
+            generatePreviews(this.options)
+
             $("#node-input-add-option").click(function() {
                 generateOption($("#node-input-option-container").children().length+1, {});
                 $("#node-input-option-container-div").scrollTop($("#node-input-option-container-div").get(0).scrollHeight);
@@ -138,6 +153,7 @@
             });
         },
         oneditsave: function() {
+            console.log("Saving...")
             var options = $("#node-input-option-container").children();
             var node = this;
             node.options = [];
@@ -145,16 +161,26 @@
             options.each(function(i) {
                 var option = $(this);
                 var o = {
-                    label: option.find(".node-input-option-label").val(),//typedInput('value'),
+                    // label: option.find(".node-input-option-label").val(),//typedInput('value'),
                     value: option.find(".node-input-option-value").val(),//typedInput('value'),
                     type: option.find(".node-input-option-type").val(),//typedInput('value')
                     required: option.find(".node-input-option-required").is(':checked'),
-                    rows: parseInt(option.find(".node-input-option-rows").val())
+                    // rows: parseInt(option.find(".node-input-option-rows").val())
                 };
                 // o.value= o.value||o.label||(o.type+"_"+i);
                 node.formValue[o.value]= o.type == "checkbox" || o.type == "switch" ? false : "";
                 node.options.push(o);
             });
+
+            var intent = "";
+            
+            node.options.forEach(function(option) {
+                intent += option.value + " ";
+            });
+            console.log(intent, node.name)
+            // node.name = intent
+           
+            
         },
     });
 </script>
@@ -217,18 +243,20 @@ input:checked + .slider:before {
     border-radius: 50%;
 }
 </style>
-    
-    <div class="form-row node-input-option-container-row" style="margin-bottom:0px; width:100%; min-width:520px">
+    <div class="form-row" style="display:flex">
+        <label for="node-input-intent-preview"><i class="fa fa-tag"></i> Preview</label>
+        <div id="node-input-intent-preview">  
+        </div>
+    </div>
+    <div class="form-row node-input-option-container-row" style="margin-bottom:0px; width:100%; min-width:700px">
         <label style="vertical-align:top;"><i class="fa fa-list-alt"></i> Intent Components</label>
         <div style="display:inline-block; width:78%; border:1px solid #ccc; border-radius:5px; box-sizing:border-box;">
           <div class="red-ui-tray-header" style="width:100%; display: inline-block; padding-top:10px; padding-buttom:10px; border-top:0px solid; border-radius:5px 5px 0 0; border-bottom:1px solid #ccc;">
               <div style="width:94%; display:inline-block; margin-left:27px">
-                <div style="width:20%; text-align:center; float:left;">Label</div>
-                <div style="width:20%; text-align:center; float:left; margin-left:9px">Name</div>
-                <div style="margin-left:7px; width:16%; text-align:center; float:left; margin-left:9px">Type</div>
-                <div style="width:16%; text-align:center; float:left;">Required</div>
-                <div style="width:10%; text-align:center; float:left;">Rows</div>
-                <div style="width:12%; text-align:center; float:left;">Remove</div>
+                <div style="width:25%; text-align:center; float:left; margin-left:9px">Name</div>
+                <div style="margin-left:40px; width:20%; text-align:center; float:left; ">Type</div>
+                <div style="width:15%;text-align:center;float:left;margin-left: 34px;">Required</div>
+                <div style="width:20%; text-align:center; float:left;">Remove</div>
               </div>
           </div>
           <div id="node-input-option-container-div" style=" height: 257px; padding: 5px; overflow-y:scroll;">
@@ -239,19 +267,10 @@ input:checked + .slider:before {
     <div class="form-row">
         <a href="#" class="editor-button editor-button-small" id="node-input-add-option" style="margin-top: 4px; margin-left: 103px;"><i class="fa fa-plus"></i> <span>element</span></a>
     </div>
-    <div class="form-row" style="display:flex">
-        <label for="node-input-intent-preview"><i class="fa fa-tag"></i> Preview</label>
-        <div id="node-input-intent-preview">
-            <p>Search Google for <code>query:string</code></p>
-        </div>
-    </div>
+    
     <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
         <input type="text" id="node-input-name">
-    </div>
-    <div class="form-row">
-        <label for="node-input-label"><i class="fa fa-tag"></i> Label</label>
-        <input type="text" id="node-input-label" placeholder="optional label">
     </div>
     
 </script>
