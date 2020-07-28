@@ -20,7 +20,7 @@
                 }, required:true},
             formValue:{value:{}},
             payload: {value: ''},
-            
+            endpointUrl : {value:"/intent-" + Math.random().toString(36).substring(2, 15) + "-" + Math.random().toString(36).substring(2, 15) + "-" + Math.random().toString(36).substring(2, 15)}, 
         },
         inputs:1,
         outputs:1,
@@ -28,6 +28,11 @@
         paletteLabel: 'bot-intent',
         label: function() { return this.name || 'bot-intent'; },
         labelStyle: function() { return this.name?"node_label_italic":""; },
+        onpaletteadd : function(){
+            var node = this;
+            console.log("added...")
+            node.payload = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+        },
         oneditprepare: function() {
             
             this.resizeRule = function(option,newWidth) {
@@ -179,8 +184,6 @@
             });
             console.log(intent, node.name)
             // node.name = intent
-           
-            
         },
     });
 </script>
