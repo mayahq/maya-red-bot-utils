@@ -21,7 +21,8 @@
   ],
   "node-red": {
     "nodes": {
-      "bot-intent": "nodes/intent.js"
+      "bot-intent": "nodes/intent.js",
+      "bot-response": "nodes/response.js"
     }
   },
   "dependencies": {
