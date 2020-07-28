@@ -366,6 +366,7 @@ module.exports = function (RED) {
 
       this.on("close", function () {
         var node = this;
+        this.callback = null;
         RED.httpNode._router.stack.forEach(function (route, i, routes) {
           if (
             route.route &&

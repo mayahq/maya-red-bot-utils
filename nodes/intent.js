@@ -69,6 +69,59 @@ module.exports = function (RED) {
     );
   }
 
+  function createResponseWrapper(node, res) {
+    var wrapper = {
+      _res: res,
+    };
+    var toWrap = [
+      "append",
+      "attachment",
+      "cookie",
+      "clearCookie",
+      "download",
+      "end",
+      "format",
+      "get",
+      "json",
+      "jsonp",
+      "links",
+      "location",
+      "redirect",
+      "render",
+      "send",
+      "sendfile",
+      "sendFile",
+      "sendStatus",
+      "set",
+      "status",
+      "type",
+      "vary",
+    ];
+    toWrap.forEach(function (f) {
+      wrapper[f] = function () {
+        node.warn(
+          RED._("httpin.errors.deprecated-call", { method: "msg.res." + f })
+        );
+        var result = res[f].apply(res, arguments);
+        if (result === res) {
+          return wrapper;
+        } else {
+          return result;
+        }
+      };
+    });
+    return wrapper;
+  }
+
+  var corsHandler = function (req, res, next) {
+    next();
+  };
+
+  if (RED.settings.httpNodeCors) {
+    corsHandler = cors(RED.settings.httpNodeCors);
+    RED.httpNode.options("*", corsHandler);
+  }
+
   function IntentNode(config) {
     RED.nodes.createNode(this, config);
     var node = this;
@@ -83,21 +136,15 @@ module.exports = function (RED) {
       this.callback = function (req, res) {
         var msgid = RED.util.generateId();
         res._msgid = msgid;
-        node.send({
-          _msgid: msgid,
-          req: req,
-          res: "hello",
-          payload: req.body,
-        });
-
-        res.send({ test: "test", body: req.body });
-        console.log(res.body);
-        // node.send({
-        //   _msgid: msgid,
-        //   req: req,
-        //   res: createResponseWrapper(node, res),
-        //   payload: req.body,
-        // });
+        node.send(
+          {
+            _msgid: msgid,
+            req: req,
+            res: createResponseWrapper(node, res),
+            payload: req.body,
+          },
+          false
+        );
       };
       var maxApiRequestSize = RED.settings.apiMaxLength || "5mb";
       var jsonParser = bodyParser.json({ limit: maxApiRequestSize });
@@ -109,7 +156,8 @@ module.exports = function (RED) {
       console.log(config.options, config);
 
       RED.httpNode.post(
-        config.endpointUrl,
+        "/testpoint",
+        corsHandler,
         jsonParser,
         urlencParser,
         rawBodyParser,
