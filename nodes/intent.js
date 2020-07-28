@@ -156,7 +156,7 @@ module.exports = function (RED) {
       console.log(config.options, config);
 
       RED.httpNode.post(
-        "/testpoint",
+        config.endpointUrl,
         corsHandler,
         jsonParser,
         urlencParser,
