@@ -187,7 +187,7 @@ module.exports = function (RED) {
           if (
             route.route &&
             route.route.path === config.endpointUrl &&
-            route.route.methods[node.method]
+            route.route.methods["post"]
           ) {
             routes.splice(i, 1);
           }
