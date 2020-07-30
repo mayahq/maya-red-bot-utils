@@ -186,7 +186,7 @@ module.exports = function (RED) {
         RED.httpNode._router.stack.forEach(function (route, i, routes) {
           if (
             route.route &&
-            route.route.path === node.url &&
+            route.route.path === config.endpointUrl &&
             route.route.methods[node.method]
           ) {
             routes.splice(i, 1);
