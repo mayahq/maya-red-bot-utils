@@ -40,7 +40,23 @@
         outputs:1,
         icon : "inject.svg",
         paletteLabel: 'bot-intent',
-        label: function() { return this.name || 'bot-intent'; },
+        label: function() {
+            if (this.name) {
+                return this.name;
+            } else if (this.options) {
+                var newLabel = "";
+                this.options.forEach(function(option) {
+                    if (option.type === "prompt"){
+                        newLabel += option.value + " ";
+                    } else {
+                        newLabel += "{ " + option.value + " : " + option.type + " } "
+                    }
+                });
+                return newLabel === "{  :  } "? "bot-intent" : newLabel;
+            } else {
+                return "bot-intent";
+            }
+        },
         labelStyle: function() { return this.name?"node_label_italic":""; },
         onpaletteadd : function(){
             var node = this;
