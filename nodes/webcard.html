@@ -17,6 +17,8 @@
         color:'#d8bfd8',
         defaults: {
             name: {value:'bot-web-card'},
+            header:  {value:"", validate: RED.validators.typedInput("headerType")},
+            headerType: {value:"global"},
             url:  {value:"", validate: RED.validators.typedInput("payloadTypeUrl")},
             payloadTypeUrl: {value:"global"},
         },
@@ -48,6 +50,24 @@
             });
 
             $("#node-input-url").typedInput('type',this.payloadTypeUrl);
+
+            if (this.headerType === null) {
+            if (this.header === "") {
+                this.headerType = "date";
+            } else {
+                this.headerType = "str";
+            }
+            } else if (this.headerType === 'string' || this.headerType === 'none') {
+                this.headerType = "str";
+            }
+            $("#node-input-headerType").val(this.headerType);
+            $("#node-input-header").typedInput({
+                default: 'str',
+                typeField: $("#node-input-headerType"),
+                types:['flow','global','msg','str']
+            });
+
+            $("#node-input-header").typedInput('type',this.headerType);
         },
     });
 </script>
@@ -58,9 +78,15 @@
         <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.name">
     </div>
     <div class="form-row">
-        <label for="node-input-url">url</label>
+        <label for="node-input-url">Card Header</label>
+        <input type="text" id="node-input-header"></input>
+        <input type="hidden" id="node-input-headerType">
+    </div>
+    <div class="form-row">
+        <label for="node-input-url">URL</label>
         <input type="text" id="node-input-url"></input>
         <input type="hidden" id="node-input-payloadTypeUrl">
     </div>
+    
     <div class="form-tips"><span data-i18n="[html]httpin.tip.res"></span></div>
 </script>

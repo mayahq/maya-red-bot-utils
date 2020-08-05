@@ -23,6 +23,8 @@ module.exports = function (RED) {
     var node = this;
     this.url = config.url;
     this.payloadTypeUrl = config.payloadTypeUrl;
+    this.header = config.header;
+    this.headerType = config.headerType;
 
     async function getValue(value, valueType, msg) {
       return new Promise(function (resolve, reject) {
@@ -94,7 +96,8 @@ module.exports = function (RED) {
         }
         var statusCode = 200;
         let url = await getValue(this.url, this.payloadTypeUrl, msg);
-        console.log(url);
+        let header = await getValue(this.header, this.headerType, msg);
+        console.log(url, header);
         let payload = {
           type: "card",
           payload: {
@@ -103,14 +106,14 @@ module.exports = function (RED) {
             moduleWidth: 40,
             top: {
               icon: "chevron-right",
-              text: "search copied google for",
+              text: header,
             },
             middle: {
               url: url,
             },
             bottom: {
               visible: false,
-              actionItems: ["Add to flow", "Save to Clipboard"],
+              actionItems: [],
             },
           },
         };
