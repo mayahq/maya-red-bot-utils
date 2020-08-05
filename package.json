@@ -23,7 +23,8 @@
     "nodes": {
       "bot-intent": "nodes/intent.js",
       "bot-response": "nodes/response.js",
-      "bot-web-card": "nodes/webcard.js"
+      "bot-web-card": "nodes/webcard.js",
+      "bot-dash-card": "nodes/dashcard.js"
     }
   },
   "dependencies": {
