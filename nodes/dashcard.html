@@ -17,6 +17,7 @@
         color:'#d8bfd8',
         defaults: {
             name: {value:'bot-dash-card'},
+            group: {type: 'ui_group', required: true},
             header:  {value:"", validate: RED.validators.typedInput("headerType")},
             headerType: {value:"global"},
         },
@@ -56,6 +57,10 @@
     <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name">Name</span></label>
         <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.name">
+    </div>
+    <div class="form-row">
+        <label for="node-input-group"><i class="fa fa-table"></i> Group</label>
+        <input type="text" id="node-input-group">
     </div>
     <div class="form-row">
         <label for="node-input-header">Card Header</label>

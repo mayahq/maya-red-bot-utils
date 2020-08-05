@@ -23,6 +23,14 @@ module.exports = function (RED) {
     var node = this;
     this.header = config.header;
     this.headerType = config.headerType;
+    var group = RED.nodes.getNode(config.group);
+    if (!group) {
+      return;
+    }
+    var tab = RED.nodes.getNode(group.config.tab);
+    if (!tab) {
+      return;
+    }
 
     async function getValue(value, valueType, msg) {
       return new Promise(function (resolve, reject) {
