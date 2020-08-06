@@ -34,7 +34,7 @@
                 }, required:true},
             formValue:{value:{}},
             payload: {value: ''},
-            endpointUrl : {value:"/intent-" + Math.random().toString(36).substring(2, 15) + "-" + Math.random().toString(36).substring(2, 15) + "-" + Math.random().toString(36).substring(2, 15)}, 
+            endpointUrl : {value:''}, 
         },
         inputs:1,
         outputs:1,
@@ -61,7 +61,7 @@
         onpaletteadd : function(){
             var node = this;
             console.log("added...")
-            node.payload = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+            node.payload = "/intent-" + Math.random().toString(36).substring(2, 15) + "-" + Math.random().toString(36).substring(2, 15) + "-" + Math.random().toString(36).substring(2, 15)
         },
         oneditprepare: function() {
             
@@ -213,6 +213,7 @@
                 intent += option.value + " ";
             });
             console.log(intent, node.name)
+            node.endpointUrl = "/intent-" + Math.random().toString(36).substring(2, 15) + "-" + Math.random().toString(36).substring(2, 15) + "-" + Math.random().toString(36).substring(2, 15)
             // node.name = intent
         },
     });
