@@ -102,7 +102,6 @@ module.exports = function (RED) {
         }
         var statusCode = 200;
         let header = await getValue(this.header, this.headerType, msg);
-        console.log(header);
         let payload = {
           type: "card",
           payload: {
@@ -115,7 +114,7 @@ module.exports = function (RED) {
             },
             middle: {
               url: "/ui",
-              tab: 1,
+              tab: tab.id,
             },
             bottom: {
               visible: false,
