@@ -11,317 +11,434 @@
   limitations under the License.
 -->
 
-
 <script type="text/javascript">
-    RED.nodes.registerType('bot-intent',{
-        category: 'botutils',
-        color: '#d8bfd8',
-        defaults: {
-            name: {value: ''},
-            order: {value: 0},
-            options: {value:[{value:'', type:'', required:true}], validate:function(value) {
-                    if (value.length ) {
-                        for (var i = 0; i < value.length; i++) {
-                            if (!value[i].value) {
-                                return false;
-                            }
-                        }
-                    }
-                    else {
-                        return false;
-                    }
-                    return true;
-                }, required:true},
-            formValue:{value:{}},
-            payload: {value: ''},
-            endpointUrl : {value:''}, 
-        },
-        inputs:1,
-        outputs:1,
-        icon : "inject.svg",
-        paletteLabel: 'bot-intent',
-        label: function() {
-            if (this.name) {
-                return this.name;
-            } else if (this.options) {
-                var newLabel = "";
-                this.options.forEach(function(option) {
-                    if (option.type === "prompt"){
-                        newLabel += option.value + " ";
-                    } else {
-                        newLabel += "{ " + option.value + " : " + option.type + " } "
-                    }
-                });
-                return newLabel === "{  :  } "? "bot-intent" : newLabel;
-            } else {
-                return "bot-intent";
+  RED.nodes.registerType("bot-intent", {
+    category: "botutils",
+    color: "#d8bfd8",
+    defaults: {
+      name: { value: "" },
+      order: { value: 0 },
+      options: {
+        value: [{ value: "", type: "", required: true }],
+        validate: function (value) {
+          if (value.length) {
+            for (var i = 0; i < value.length; i++) {
+              if (!value[i].value) {
+                return false;
+              }
             }
+          } else {
+            return false;
+          }
+          return true;
         },
-        labelStyle: function() { return this.name?"node_label_italic":""; },
-        onpaletteadd : function(){
-            var node = this;
-            console.log("added...")
-            node.payload = "/intent-" + Math.random().toString(36).substring(2, 15) + "-" + Math.random().toString(36).substring(2, 15) + "-" + Math.random().toString(36).substring(2, 15)
-        },
-        oneditprepare: function() {
-            
-            this.resizeRule = function(option,newWidth) {
-                //option.find(".node-input-option-type").width(newWidth);
-                //  option.find(".node-input-option-label").width(newWidth);
-                //  option.find(".node-input-option-value").width(newWidth);
+        required: true,
+      },
+      formValue: { value: {} },
+      payload: { value: "" },
+      endpointUrl: { value: "" },
+    },
+    inputs: 1,
+    outputs: 1,
+    icon: "inject.svg",
+    paletteLabel: "bot-intent",
+    label: function () {
+      if (this.name) {
+        return this.name;
+      } else if (this.options) {
+        var newLabel = "";
+        this.options.forEach(function (option) {
+          if (option.type === "prompt") {
+            newLabel += option.value + " ";
+          } else {
+            newLabel += "{ " + option.value + " : " + option.type + " } ";
+          }
+        });
+        return newLabel === "{  :  } " ? "bot-intent" : newLabel;
+      } else {
+        return "bot-intent";
+      }
+    },
+    labelStyle: function () {
+      return this.name ? "node_label_italic" : "";
+    },
+    onpaletteadd: function () {
+      var node = this;
+      console.log("added...");
+      node.payload =
+        "/intent-" +
+        Math.random().toString(36).substring(2, 15) +
+        "-" +
+        Math.random().toString(36).substring(2, 15) +
+        "-" +
+        Math.random().toString(36).substring(2, 15);
+    },
+    oneditprepare: function () {
+      this.resizeRule = function (option, newWidth) {
+        //option.find(".node-input-option-type").width(newWidth);
+        //  option.find(".node-input-option-label").width(newWidth);
+        //  option.find(".node-input-option-value").width(newWidth);
+      };
+
+      // This generates the preview for the intent
+      function generatePreviews(options) {
+        var previews = $("#node-input-intent-preview");
+        var htmlElem = "<p>";
+        options.forEach(function (option) {
+          if (option.type === "prompt") {
+            htmlElem += "<b> " + option.value + " </b>";
+          } else {
+            htmlElem +=
+              "<code><b>" + option.value + ":" + option.type + "</b></code>";
+          }
+        });
+        htmlElem += "</p>";
+        // console.log(htmlElem)
+        $(htmlElem).appendTo(previews);
+      }
+
+      function generateOption(i, option) {
+        var container = $("<li/>", {
+          style: "margin:0; padding:8px 0px 0px; border-bottom:1px solid #ccc;",
+        });
+        var row = $("<div/>").appendTo(container);
+        var row2 = $("<div/>", {
+          style: "padding-top:5px; padding-left:175px;",
+        }).appendTo(container);
+        var row3 = $("<div/>", {
+          style: "padding-top:5px; padding-left:120px;",
+        }).appendTo(container);
+
+        $(
+          '<i style="cursor:move; margin-left:3px;" class="node-input-option-handle fa fa-bars"></i>'
+        ).appendTo(row);
+
+        // var labelField = $('<input/>',{class:"node-input-option-label", type:"text", style:"margin-left:7px; width:20%;", placeholder: 'e.g. Name', value:option.label}).appendTo(row);//.typedInput({default:'str',types:['str', 'num']});
+        var valueClass = "node-input-option-value";
+        if (!option.value) {
+          valueClass = "node-input-option-value input-error";
+        }
+        var valueField = $("<input/>", {
+          class: valueClass,
+          type: "text",
+          style: "margin-left:7px; width:30%;",
+          placeholder: "e.g. name",
+          value: option.value,
+        }).appendTo(row); //.typedInput({default:'str',types:['str','num','bool']});
+        valueField.keyup(function () {
+          if ($(this).val() && $(this).hasClass("input-error")) {
+            $(this).removeClass("input-error");
+          } else {
+            if (!$(this).val()) {
+              $(this).addClass("input-error");
             }
+          }
+        });
+        // var typeField = $('<input/>',{class:"node-input-option-type",type:"text",style:"margin-left: 7px; width: 135px;", placeholder: 'Type', value:option.type}).appendTo(row).typedInput({default:'str',types:['str', 'num']});
+        var typeField = $("<select/>", {
+          class: "node-input-option-type",
+          type: "text",
+          style: "margin-left:7px; width:25%",
+        }).appendTo(row); //.typedInput({default:'str',types:['str', 'num']});
 
-            // This generates the preview for the intent
-            function generatePreviews(options){
-                var previews = $("#node-input-intent-preview")
-                var htmlElem = "<p>";
-                options.forEach(function(option) {
-                    if (option.type === "prompt"){
-                        htmlElem += "<b> " + option.value + " </b>";
-                    } else {
-                        htmlElem += "<code><b>" + option.value + ":" + option.type + "</b></code>"
-                    }
-                });
-                htmlElem += "</p>"
-                // console.log(htmlElem)
-                $(htmlElem).appendTo(previews)
-                
-            }
+        var arr = [
+          { val: "prompt", text: "Intent Prompt" },
+          { val: "number", text: "Number Variable" },
+          { val: "string", text: "String Variable" },
+          { val: "email", text: "E-mail Variable" },
+          { val: "phone", text: "Phone Variable" },
+          { val: "time", text: "Time Variable" },
+          { val: "app", text: "App Variable" },
+          { val: "file", text: "File Variable" },
+          { val: "folder", text: "Folder Variable" },
+          { val: "multiline", text: "Multiline" },
+        ];
 
-            function generateOption(i, option) {
-                var container = $('<li/>',{style:"margin:0; padding:8px 0px 0px; border-bottom:1px solid #ccc;"});
-                var row = $('<div/>').appendTo(container);
-                var row2 = $('<div/>',{style:"padding-top:5px; padding-left:175px;"}).appendTo(container);
-                var row3 = $('<div/>',{style:"padding-top:5px; padding-left:120px;"}).appendTo(container);
+        //var sel = $('<select>').appendTo('body');
+        $(arr).each(function () {
+          var isSelected = false;
+          if (option.type == this.val) {
+            isSelected = true;
+          }
+          typeField.append(
+            $("<option>")
+              .attr("value", this.val)
+              .text(this.text)
+              .prop("selected", isSelected)
+          );
+        });
 
-                $('<i style="cursor:move; margin-left:3px;" class="node-input-option-handle fa fa-bars"></i>').appendTo(row);
+        //var labelForRequried = $('<span/>',{style:"margin: 10px;"}).text('Required').appendTo(row);
+        var requiredContainer = $("<div/>", {
+          style:
+            "display:inline-block; height:34px; width:18%; vertical-align: middle",
+        }).appendTo(row);
+        var requiredInnerContainer = $("<div/>", {
+          style: "left:35%; position:relative; width:30px",
+        }).appendTo(requiredContainer);
+        var reqRow = $("<label />", {
+          class: "switch",
+          style: "top:10px; width:30px;",
+        }).appendTo(requiredInnerContainer);
+        //var required = $('<input/>',{class:"node-input-option-required",style:"margin: 5px;width:19%",type:"checkbox", checked:option.required}).appendTo(row);//labelForRequried);//.typedInput({default:'str',types:['str', 'num']});
+        var required = $("<input/>", {
+          class: "node-input-option-required",
+          type: "checkbox",
+          checked: option.required,
+          style: "vertical-align:top;",
+        }).appendTo(reqRow); //labelForRequried);//.typedInput({default:'str',types:['str', 'num']});
+        var reqDiv = $("<div />", { class: "slider round" }).appendTo(reqRow);
+        var vis = option.rows ? "visible" : "hidden";
+        //var rowsField = $('<input/>',{class:"node-input-option-rows", type:"number", style:"width:10%;", placeholder:'Rows', value:option.rows }).css('visibility',vis).appendTo(row);
 
-                // var labelField = $('<input/>',{class:"node-input-option-label", type:"text", style:"margin-left:7px; width:20%;", placeholder: 'e.g. Name', value:option.label}).appendTo(row);//.typedInput({default:'str',types:['str', 'num']});
-                var valueClass ="node-input-option-value"
-                if (!option.value) { valueClass ="node-input-option-value input-error"; }
-                var valueField = $('<input/>',{class:valueClass, type:"text", style:"margin-left:7px; width:30%;", placeholder: 'e.g. name', value:option.value}).appendTo(row);//.typedInput({default:'str',types:['str','num','bool']});
-                valueField.keyup(function() {
-                    if ($(this).val() && $(this).hasClass('input-error')) {
-                        $(this).removeClass('input-error')
-                    }
-                    else {
-                        if (!$(this).val()) {
-                            $(this).addClass('input-error')
-                        }
-                    }
+        var finalspan = $("<div/>", {
+          style: "display:inline-block; width:5%; margin-left:15px;",
+        }).appendTo(row);
+        var deleteButton = $("<a/>", {
+          href: "#",
+          class: "editor-button",
+          style: "font-size:1.3em; left:45%; position:relative;",
+        }).appendTo(finalspan);
+        $("<i/>", { class: "fa fa-trash-o" }).appendTo(deleteButton);
 
-                });
-                // var typeField = $('<input/>',{class:"node-input-option-type",type:"text",style:"margin-left: 7px; width: 135px;", placeholder: 'Type', value:option.type}).appendTo(row).typedInput({default:'str',types:['str', 'num']});
-                var typeField = $('<select/>',{class:"node-input-option-type",type:"text",style:"margin-left:7px; width:25%"}).appendTo(row);//.typedInput({default:'str',types:['str', 'num']});
+        typeField.change(function (e) {
+          if (e.target.value != "multiline") {
+            rowsField.val(undefined);
+            option.rows = null;
+            rowsField.css("visibility", "hidden");
+          } else {
+            rowsField.css("visibility", "visible");
+            if (!rowsField[0].value) rowsField[0].value = 3;
+          }
+        });
 
-                var arr = [
-                  {val : "prompt", text: 'Intent Prompt'},
-                  {val : "number", text: 'Number Variable'},
-                  {val : "string", text: 'String Variable'},
-                  {val : "email", text: 'E-mail Variable'},
-                  {val : "date", text: 'Date Variable'},
-                   {val : "multiline", text: 'Multiline'},
-                ];
+        deleteButton.click(function () {
+          container.find(".node-input-option-value").removeAttr("required");
+          container.css({ background: "#fee" });
+          container.fadeOut(300, function () {
+            $(this).remove();
+          });
+        });
 
-                //var sel = $('<select>').appendTo('body');
-                $(arr).each(function() {
-                    var isSelected= false;
-                    if (option.type == this.val) {
-                        isSelected = true;
-                    }
-                    typeField.append($("<option>").attr('value',this.val).text(this.text).prop('selected',isSelected));
-                });
-               
-                //var labelForRequried = $('<span/>',{style:"margin: 10px;"}).text('Required').appendTo(row);
-                var requiredContainer= $('<div/>',{style:"display:inline-block; height:34px; width:18%; vertical-align: middle"}).appendTo(row);
-                var requiredInnerContainer= $('<div/>',{style:"left:35%; position:relative; width:30px"}).appendTo(requiredContainer);
-                var reqRow=$("<label />",{class:"switch",style:"top:10px; width:30px;"}).appendTo(requiredInnerContainer);
-                //var required = $('<input/>',{class:"node-input-option-required",style:"margin: 5px;width:19%",type:"checkbox", checked:option.required}).appendTo(row);//labelForRequried);//.typedInput({default:'str',types:['str', 'num']});
-                var required = $('<input/>',{class:"node-input-option-required", type:"checkbox", checked:option.required, style:"vertical-align:top;"}).appendTo(reqRow);//labelForRequried);//.typedInput({default:'str',types:['str', 'num']});
-                var reqDiv=$("<div />",{class:"slider round"}).appendTo(reqRow);
-                var vis = option.rows ? 'visible' : 'hidden';
-                //var rowsField = $('<input/>',{class:"node-input-option-rows", type:"number", style:"width:10%;", placeholder:'Rows', value:option.rows }).css('visibility',vis).appendTo(row);
-               
-                var finalspan = $('<div/>',{style:"display:inline-block; width:5%; margin-left:15px;"}).appendTo(row);
-                var deleteButton = $('<a/>',{href:"#",class:"editor-button", style:"font-size:1.3em; left:45%; position:relative;"}).appendTo(finalspan);
-                $('<i/>',{class:"fa fa-trash-o"}).appendTo(deleteButton);
+        $("#node-input-option-container").append(container);
+      }
 
-                typeField.change(function(e){
-                    if (e.target.value != 'multiline') { 
-                        rowsField.val(undefined)
-                        option.rows = null;
-                        rowsField.css('visibility','hidden')
-                    } else {
-                        rowsField.css('visibility','visible')
-                        if (!rowsField[0].value) rowsField[0].value = 3;
-                    }
-                    
-                })
+      generatePreviews(this.options);
 
-                deleteButton.click(function() {
-                    container.find(".node-input-option-value").removeAttr('required')
-                    container.css({"background":"#fee"});
-                    container.fadeOut(300, function() {
-                        $(this).remove();
-                    });
-                });
+      $("#node-input-add-option").click(function () {
+        generateOption(
+          $("#node-input-option-container").children().length + 1,
+          {}
+        );
+        $("#node-input-option-container-div").scrollTop(
+          $("#node-input-option-container-div").get(0).scrollHeight
+        );
+      });
 
-                $("#node-input-option-container").append(container);
-            }
+      for (var i = 0; i < this.options.length; i++) {
+        var option = this.options[i];
+        generateOption(i + 1, option);
+      }
 
-            generatePreviews(this.options)
+      $("#node-input-option-container").sortable({
+        axis: "y",
+        handle: ".node-input-option-handle",
+        cursor: "move",
+      });
+    },
+    oneditsave: function () {
+      console.log("Saving...");
+      var options = $("#node-input-option-container").children();
+      var node = this;
+      node.options = [];
+      node.formValue = {};
+      options.each(function (i) {
+        var option = $(this);
+        var o = {
+          // label: option.find(".node-input-option-label").val(),//typedInput('value'),
+          value: option.find(".node-input-option-value").val(), //typedInput('value'),
+          type: option.find(".node-input-option-type").val(), //typedInput('value')
+          required: option.find(".node-input-option-required").is(":checked"),
+          // rows: parseInt(option.find(".node-input-option-rows").val())
+        };
+        // o.value= o.value||o.label||(o.type+"_"+i);
+        node.formValue[o.value] =
+          o.type == "checkbox" || o.type == "switch" ? false : "";
+        node.options.push(o);
+      });
 
-            $("#node-input-add-option").click(function() {
-                generateOption($("#node-input-option-container").children().length+1, {});
-                $("#node-input-option-container-div").scrollTop($("#node-input-option-container-div").get(0).scrollHeight);
-            });
+      var intent = "";
 
-            for (var i=0; i<this.options.length; i++) {
-                var option = this.options[i];
-                generateOption(i+1,option);
-            }
-
-            $( "#node-input-option-container" ).sortable({
-                axis: "y",
-                handle:".node-input-option-handle",
-                cursor: "move"
-            });
-        },
-        oneditsave: function() {
-            console.log("Saving...")
-            var options = $("#node-input-option-container").children();
-            var node = this;
-            node.options = [];
-            node.formValue = {};
-            options.each(function(i) {
-                var option = $(this);
-                var o = {
-                    // label: option.find(".node-input-option-label").val(),//typedInput('value'),
-                    value: option.find(".node-input-option-value").val(),//typedInput('value'),
-                    type: option.find(".node-input-option-type").val(),//typedInput('value')
-                    required: option.find(".node-input-option-required").is(':checked'),
-                    // rows: parseInt(option.find(".node-input-option-rows").val())
-                };
-                // o.value= o.value||o.label||(o.type+"_"+i);
-                node.formValue[o.value]= o.type == "checkbox" || o.type == "switch" ? false : "";
-                node.options.push(o);
-            });
-
-            var intent = "";
-            
-            node.options.forEach(function(option) {
-                intent += option.value + " ";
-            });
-            console.log(intent, node.name)
-            node.endpointUrl = "/intent-" + Math.random().toString(36).substring(2, 15) + "-" + Math.random().toString(36).substring(2, 15) + "-" + Math.random().toString(36).substring(2, 15)
-            // node.name = intent
-        },
-    });
+      node.options.forEach(function (option) {
+        intent += option.value + " ";
+      });
+      console.log(intent, node.name);
+      node.endpointUrl =
+        "/intent-" +
+        Math.random().toString(36).substring(2, 15) +
+        "-" +
+        Math.random().toString(36).substring(2, 15) +
+        "-" +
+        Math.random().toString(36).substring(2, 15);
+      // node.name = intent
+    },
+  });
 </script>
 <script type="text/html" data-template-name="bot-intent">
+  <style>
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 30px;
+      height: 18px;
+    }
 
-<style>
-.switch {
-    position: relative;
-    display: inline-block;
-    width: 30px;
-    height: 18px;
-}
+    .switch input {
+      display: none;
+    }
 
-.switch input {display:none;}
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      -webkit-transition: 0.4s;
+      transition: 0.4s;
+    }
 
-.slider {
-    position: absolute;
-    cursor: pointer;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: #ccc;
-    -webkit-transition: .4s;
-    transition: .4s;
-}
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 15px;
+      width: 15px;
+      left: 2px;
+      bottom: 2px;
+      background-color: white;
+      -webkit-transition: 0.4s;
+      transition: 0.4s;
+    }
 
-.slider:before {
-    position: absolute;
-    content: "";
-    height: 15px;
-    width: 15px;
-    left: 2px;
-    bottom: 2px;
-    background-color: white;
-    -webkit-transition: .4s;
-    transition: .4s;
-}
+    input:checked + .slider {
+      background-color: #910000;
+    }
 
-input:checked + .slider {
-    background-color: #910000;
-}
+    input:focus + .slider {
+      box-shadow: 0 0 1px #2196f3;
+    }
 
-input:focus + .slider {
-    box-shadow: 0 0 1px #2196F3;
-}
+    input:checked + .slider:before {
+      -webkit-transform: translateX(11px);
+      -ms-transform: translateX(11px);
+      transform: translateX(11px);
+    }
 
-input:checked + .slider:before {
-    -webkit-transform: translateX(11px);
-    -ms-transform: translateX(11px);
-    transform: translateX(11px);
-}
+    /* Rounded sliders */
+    .slider.round {
+      border-radius: 34px;
+    }
 
-/* Rounded sliders */
-.slider.round {
-    border-radius: 34px;
-}
-
-.slider.round:before {
-    border-radius: 50%;
-}
-</style>
-    <div class="form-row" style="display:flex">
-        <label for="node-input-intent-preview"><i class="fa fa-tag"></i> Preview</label>
-        <div id="node-input-intent-preview">  
-        </div>
-    </div>
-    <div class="form-row node-input-option-container-row" style="margin-bottom:0px; width:100%; min-width:700px">
-        <label style="vertical-align:top;"><i class="fa fa-list-alt"></i> Intent Components</label>
-        <div style="display:inline-block; width:78%; border:1px solid #ccc; border-radius:5px; box-sizing:border-box;">
-          <div class="red-ui-tray-header" style="width:100%; display: inline-block; padding-top:10px; padding-buttom:10px; border-top:0px solid; border-radius:5px 5px 0 0; border-bottom:1px solid #ccc;">
-              <div style="width:94%; display:inline-block; margin-left:27px">
-                <div style="width:25%; text-align:center; float:left; margin-left:9px">Name</div>
-                <div style="margin-left:40px; width:20%; text-align:center; float:left; ">Type</div>
-                <div style="width:15%;text-align:center;float:left;margin-left: 34px;">Required</div>
-                <div style="width:20%; text-align:center; float:left;">Remove</div>
-              </div>
+    .slider.round:before {
+      border-radius: 50%;
+    }
+  </style>
+  <div class="form-row" style="display:flex">
+    <label for="node-input-intent-preview"
+      ><i class="fa fa-tag"></i> Preview</label
+    >
+    <div id="node-input-intent-preview"></div>
+  </div>
+  <div
+    class="form-row node-input-option-container-row"
+    style="margin-bottom:0px; width:100%; min-width:700px"
+  >
+    <label style="vertical-align:top;"
+      ><i class="fa fa-list-alt"></i> Intent Components</label
+    >
+    <div
+      style="display:inline-block; width:78%; border:1px solid #ccc; border-radius:5px; box-sizing:border-box;"
+    >
+      <div
+        class="red-ui-tray-header"
+        style="width:100%; display: inline-block; padding-top:10px; padding-buttom:10px; border-top:0px solid; border-radius:5px 5px 0 0; border-bottom:1px solid #ccc;"
+      >
+        <div style="width:94%; display:inline-block; margin-left:27px">
+          <div
+            style="width:25%; text-align:center; float:left; margin-left:9px"
+          >
+            Name
           </div>
-          <div id="node-input-option-container-div" style=" height: 257px; padding: 5px; overflow-y:scroll;">
-            <ol id="node-input-option-container" style=" list-style-type:none; margin: 0;"></ol>
+          <div
+            style="margin-left:40px; width:20%; text-align:center; float:left; "
+          >
+            Type
           </div>
+          <div
+            style="width:15%;text-align:center;float:left;margin-left: 34px;"
+          >
+            Required
+          </div>
+          <div style="width:20%; text-align:center; float:left;">Remove</div>
         </div>
+      </div>
+      <div
+        id="node-input-option-container-div"
+        style=" height: 257px; padding: 5px; overflow-y:scroll;"
+      >
+        <ol
+          id="node-input-option-container"
+          style=" list-style-type:none; margin: 0;"
+        ></ol>
+      </div>
     </div>
-    <div class="form-row">
-        <a href="#" class="editor-button editor-button-small" id="node-input-add-option" style="margin-top: 4px; margin-left: 103px;"><i class="fa fa-plus"></i> <span>element</span></a>
-    </div>
-    
-    <div class="form-row">
-        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
-        <input type="text" id="node-input-name">
-    </div>
-    
+  </div>
+  <div class="form-row">
+    <a
+      href="#"
+      class="editor-button editor-button-small"
+      id="node-input-add-option"
+      style="margin-top: 4px; margin-left: 103px;"
+      ><i class="fa fa-plus"></i> <span>element</span></a
+    >
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+    <input type="text" id="node-input-name" />
+  </div>
 </script>
 
 <script type="text/html" data-help-name="bot-intent">
-    <p>Adds a form to user interface.</p>
-    <p>Helps to collect multiple value from the user on submit button click as an object in <code> msg.payload</code> </p>
-    <p>Multiple input elements can be added using add elements button</p>
-    <p>Each element contains following components:</p>
-    <ul>
-        <li> <b>Label</b> : Value that will be the label of the element in the user interface</li>
-        <li> <b>Name</b> : Represents the key (variable name) in the <code>msg.payload</code> in which the value of the corresponding element present</li>
-        <li> <b>Type</b> : Drop drown option to select the type of input element</li>
-        <li> <b>Required</b> : On switching on the user has to supply the value before submitting</li>
-        <li> <b>Rows</b> : number of UI rows for multiline text input</li>
-        <li> <b>Delete</b> : To remove the current element form the form</li>
-    </ul>
-    <p>Optionally the <b>Topic</b> field can be used to set the <code>msg.topic</code> property.</p>
-    <p>The Cancel button can be hidden by setting it's value to be blank "".</p>
+  <p>Adds a form to user interface.</p>
+  <p>
+    Helps to collect multiple value from the user on submit button click as an
+    object in <code> msg.payload</code>
+  </p>
+  <p>Multiple input elements can be added using add elements button</p>
+  <p>Each element contains following components:</p>
+  <ul>
+    <li>
+      <b>Label</b> : Value that will be the label of the element in the user
+      interface
+    </li>
+    <li>
+      <b>Name</b> : Represents the key (variable name) in the
+      <code>msg.payload</code> in which the value of the corresponding element
+      present
+    </li>
+    <li><b>Type</b> : Drop drown option to select the type of input element</li>
+    <li>
+      <b>Required</b> : On switching on the user has to supply the value before
+      submitting
+    </li>
+    <li><b>Rows</b> : number of UI rows for multiline text input</li>
+    <li><b>Delete</b> : To remove the current element form the form</li>
+  </ul>
+  <p>
+    Optionally the <b>Topic</b> field can be used to set the
+    <code>msg.topic</code> property.
+  </p>
+  <p>The Cancel button can be hidden by setting it's value to be blank "".</p>
 </script>
