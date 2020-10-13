@@ -154,7 +154,7 @@
           { val: "folder", text: "Folder Variable" },
           { val: "url", text: "URL Variable" },
           { val: "multiline", text: "Multiline" },
-          { val: "custom", text: "Custom Placeholder"}
+          { val: "custom-search", text: "Custom Placeholder"}
         ];
 
         //var sel = $('<select>').appendTo('body');
@@ -177,22 +177,6 @@
           style: "margin-left:7px; width:20%;",
           type: "text"
         }).appendTo(row);
-        
-        var searchNodes = RED.view.getActiveNodes().filter(node => node.type === "custom-search");
-        console.log(searchNodes);
-
-        $(searchNodes).each(function () {
-          var isSelected = false;
-          if (option.type == this.val) {
-            isSelected = true;
-          }
-          customNodeField.append(
-            $("<option>")
-              .attr("value", this.name)
-              .text(this.name)
-              .prop("selected", isSelected)
-          );
-        });
         // Custom Search Node Input form logic END here
 
         //var labelForRequried = $('<span/>',{style:"margin: 10px;"}).text('Required').appendTo(row);
@@ -216,7 +200,7 @@
         }).appendTo(reqRow); //labelForRequried);//.typedInput({default:'str',types:['str', 'num']});
         var reqDiv = $("<div />", { class: "slider round" }).appendTo(reqRow);
         var vis = option.rows ? "visible" : "hidden";
-        //var rowsField = $('<input/>',{class:"node-input-option-rows", type:"number", style:"width:10%;", placeholder:'Rows', value:option.rows }).css('visibility',vis).appendTo(row);
+        var rowsField = $('<input/>',{class:"node-input-option-rows", type:"number", style:"width:10%;", placeholder:'Rows', value:option.rows }).css('visibility',vis).appendTo(row);
 
         var finalspan = $("<div/>", {
           style: "display:inline-block; width:5%; margin-left:10px;",
@@ -229,7 +213,22 @@
         $("<i/>", { class: "fa fa-trash-o" }).appendTo(deleteButton);
 
         typeField.change(function (e) {
-          if (e.target.value != "multiline") {
+          if (e.target.value === "custom-search"){
+            var searchNodes = RED.view.getActiveNodes().filter(node => node.type === "custom-search");
+            $(searchNodes).each(function () {
+              var isSelected = false;
+              if (option.type == this.val) {
+                isSelected = true;
+              }
+              customNodeField.append(
+                $("<option>")
+                  .attr("value", this.name)
+                  .text(this.name)
+                  .prop("selected", isSelected)
+              );
+            });
+            // Custom Search Node Input form logic END here
+          } else if (e.target.value != "multiline") {
             rowsField.val(undefined);
             option.rows = null;
             rowsField.css("visibility", "hidden");
@@ -413,7 +412,7 @@
           >
             Required
           </div>
-          <div style="width:10%; text-align:left; float:left;">Remove</div>
+          <div style="width:10%; text-align:right; float:right;">Remove</div>
         </div>
       </div>
       <div
