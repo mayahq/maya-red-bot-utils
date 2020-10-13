@@ -38,7 +38,7 @@
       payload: { value: "" },
       endpointUrl: { value: "" },
     },
-    inputs: 1,
+    inputs: 0,
     outputs: 1,
     icon: "inject.svg",
     paletteLabel: "bot-intent",
@@ -121,7 +121,7 @@
         var valueField = $("<input/>", {
           class: valueClass,
           type: "text",
-          style: "margin-left:7px; width:30%;",
+          style: "margin-left:7px; width:20%;",
           placeholder: "e.g. name",
           value: option.value,
         }).appendTo(row); //.typedInput({default:'str',types:['str','num','bool']});
@@ -138,7 +138,7 @@
         var typeField = $("<select/>", {
           class: "node-input-option-type",
           type: "text",
-          style: "margin-left:7px; width:25%",
+          style: "margin-left:7px; width:20%",
         }).appendTo(row); //.typedInput({default:'str',types:['str', 'num']});
 
         var arr = [
@@ -154,6 +154,7 @@
           { val: "folder", text: "Folder Variable" },
           { val: "url", text: "URL Variable" },
           { val: "multiline", text: "Multiline" },
+          { val: "custom", text: "Custom Placeholder"}
         ];
 
         //var sel = $('<select>').appendTo('body');
@@ -169,14 +170,38 @@
               .prop("selected", isSelected)
           );
         });
+        // Custom Search Node Input form logic start here
+        var customNodeClass = "node-input-option-customNode";
+        var customNodeField = $("<select/>", {
+          class: customNodeClass,
+          style: "margin-left:7px; width:20%;",
+          type: "text"
+        }).appendTo(row);
+        
+        var searchNodes = RED.view.getActiveNodes().filter(node => node.type === "custom-search");
+        console.log(searchNodes);
+
+        $(searchNodes).each(function () {
+          var isSelected = false;
+          if (option.type == this.val) {
+            isSelected = true;
+          }
+          customNodeField.append(
+            $("<option>")
+              .attr("value", this.name === "" ? this.id : this.name)
+              .text(this.name === "" ? this.id : this.name)
+              .prop("selected", isSelected)
+          );
+        });
+        // Custom Search Node Input form logic END here
 
         //var labelForRequried = $('<span/>',{style:"margin: 10px;"}).text('Required').appendTo(row);
         var requiredContainer = $("<div/>", {
           style:
-            "display:inline-block; height:34px; width:18%; vertical-align: middle",
+            "display:inline-block; height:34px; width:15%; vertical-align: middle",
         }).appendTo(row);
         var requiredInnerContainer = $("<div/>", {
-          style: "left:35%; position:relative; width:30px",
+          style: "left:25%; position:relative; width:20px",
         }).appendTo(requiredContainer);
         var reqRow = $("<label />", {
           class: "switch",
@@ -194,12 +219,12 @@
         //var rowsField = $('<input/>',{class:"node-input-option-rows", type:"number", style:"width:10%;", placeholder:'Rows', value:option.rows }).css('visibility',vis).appendTo(row);
 
         var finalspan = $("<div/>", {
-          style: "display:inline-block; width:5%; margin-left:15px;",
+          style: "display:inline-block; width:5%; margin-left:10px;",
         }).appendTo(row);
         var deleteButton = $("<a/>", {
           href: "#",
           class: "editor-button",
-          style: "font-size:1.3em; left:45%; position:relative;",
+          style: "font-size:1.3em; left:5%; position:relative;",
         }).appendTo(finalspan);
         $("<i/>", { class: "fa fa-trash-o" }).appendTo(deleteButton);
 
@@ -261,6 +286,7 @@
           value: option.find(".node-input-option-value").val(), //typedInput('value'),
           type: option.find(".node-input-option-type").val(), //typedInput('value')
           required: option.find(".node-input-option-required").is(":checked"),
+          customNode: option.find(".node-input-options-customNode").val()
           // rows: parseInt(option.find(".node-input-option-rows").val())
         };
         // o.value= o.value||o.label||(o.type+"_"+i);
@@ -368,21 +394,26 @@
       >
         <div style="width:94%; display:inline-block; margin-left:27px">
           <div
-            style="width:25%; text-align:center; float:left; margin-left:9px"
+            style="width:20%; text-align:left; float:left; margin-left:5px"
           >
             Name
           </div>
           <div
-            style="margin-left:40px; width:20%; text-align:center; float:left; "
+            style="margin-left:5px; width:20%; text-align:left; float:left; "
           >
             Type
           </div>
           <div
-            style="width:15%;text-align:center;float:left;margin-left: 34px;"
+            style="margin-left:5px; width:20%; text-align:left; float:left; "
+          >
+            Custom Search
+          </div>
+          <div
+            style="width:15%;text-align:center;float:left;margin-left: 5px;"
           >
             Required
           </div>
-          <div style="width:20%; text-align:center; float:left;">Remove</div>
+          <div style="width:10%; text-align:left; float:left;">Remove</div>
         </div>
       </div>
       <div
