@@ -188,8 +188,8 @@
           }
           customNodeField.append(
             $("<option>")
-              .attr("value", this.name === "" ? this.id : this.name)
-              .text(this.name === "" ? this.id : this.name)
+              .attr("value", this.name)
+              .text(this.name)
               .prop("selected", isSelected)
           );
         });
