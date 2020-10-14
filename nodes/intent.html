@@ -19,7 +19,7 @@
       name: { value: "" },
       order: { value: 0 },
       options: {
-        value: [{ value: "", type: "", required: true }],
+        value: [{ value: "", type: "", required: true, controller: ""}],
         validate: function (value) {
           if (value.length) {
             for (var i = 0; i < value.length; i++) {
@@ -215,6 +215,7 @@
         typeField.change(function (e) {
           if (e.target.value === "custom-search"){
             var searchNodes = RED.view.getActiveNodes().filter(node => node.type === "custom-search");
+            console.log(searchNodes)
             $(searchNodes).each(function () {
               var isSelected = false;
               if (option.type == this.val) {
@@ -222,7 +223,7 @@
               }
               customNodeField.append(
                 $("<option>")
-                  .attr("value", this.name)
+                  .attr({"value": this.name, "endpoint":this.endpointUrl})
                   .text(this.name)
                   .prop("selected", isSelected)
               );
@@ -236,6 +237,11 @@
             rowsField.css("visibility", "visible");
             if (!rowsField[0].value) rowsField[0].value = 3;
           }
+        });
+
+        customNodeField.change(function (e) {
+
+          
         });
 
         deleteButton.click(function () {
@@ -285,7 +291,7 @@
           value: option.find(".node-input-option-value").val(), //typedInput('value'),
           type: option.find(".node-input-option-type").val(), //typedInput('value')
           required: option.find(".node-input-option-required").is(":checked"),
-          customNode: option.find(".node-input-options-customNode").val()
+          endpoint: option.find(".node-input-option-customNode").attr("endpoint")
           // rows: parseInt(option.find(".node-input-option-rows").val())
         };
         // o.value= o.value||o.label||(o.type+"_"+i);
