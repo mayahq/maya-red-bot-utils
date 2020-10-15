@@ -19,7 +19,7 @@
       name: { value: "" },
       order: { value: 0 },
       options: {
-        value: [{ value: "", type: "", required: true, controller: ""}],
+        value: [{ value: "", type: "", required: true, endpoint: "", searchNode: ""}],
         validate: function (value) {
           if (value.length) {
             for (var i = 0; i < value.length; i++) {
@@ -170,14 +170,68 @@
               .prop("selected", isSelected)
           );
         });
-        // Custom Search Node Input form logic start here
+
         var customNodeClass = "node-input-option-customNode";
         var customNodeField = $("<select/>", {
           class: customNodeClass,
           style: "margin-left:7px; width:20%;",
           type: "text"
         }).appendTo(row);
-        // Custom Search Node Input form logic END here
+
+        if(option.type != "custom-search")
+          customNodeField.css("visibility", "hidden")
+        else {
+          var searchNodes = RED.view.getActiveNodes().filter(node => node.type === "custom-search");
+                $(searchNodes).each(function () {
+                  var isSelected = false;
+                  if(option.customNode == this.id){
+                    isSelected = true
+                  }
+                  customNodeField.append(
+                    $("<option>")
+                      .attr("value", this.name)
+                      .attr("endpoint", this.endpointUrl)
+                      .attr("customNode", this.id)
+                      .text(this.name)
+                      .prop("selected", isSelected)
+                  );
+                });
+          customNodeField.css("visibility", "visible")
+        }
+          
+
+        typeField.change(function (e) {
+          if (e.target.value === "custom-search"){
+            customNodeField.css("visibility", "visible")
+            // Custom Search Node Input form logic start here
+            var searchNodes = RED.view.getActiveNodes().filter(node => node.type === "custom-search");
+                $(searchNodes).each(function () {
+                  var isSelected = false;
+                  if(option.customNode == this.id){
+                    isSelected = true
+                  }
+                  customNodeField.append(
+                    $("<option>")
+                      .attr("value", this.name)
+                      .attr("endpoint", this.endpointUrl)
+                      .attr("customNode", this.id)
+                      .text(this.name)
+                      .prop("selected", isSelected)
+                  );
+                });
+          } else {
+            customNodeField.empty()
+            customNodeField.css("visibility", "hidden")
+          }
+          if (e.target.value != "multiline") {
+            rowsField.val(undefined);
+            option.rows = null;
+            rowsField.css("visibility", "hidden");
+          } else {
+            rowsField.css("visibility", "visible");
+            if (!rowsField[0].value) rowsField[0].value = 3;
+          }
+        });
 
         //var labelForRequried = $('<span/>',{style:"margin: 10px;"}).text('Required').appendTo(row);
         var requiredContainer = $("<div/>", {
@@ -212,38 +266,6 @@
         }).appendTo(finalspan);
         $("<i/>", { class: "fa fa-trash-o" }).appendTo(deleteButton);
 
-        typeField.change(function (e) {
-          if (e.target.value === "custom-search"){
-            var searchNodes = RED.view.getActiveNodes().filter(node => node.type === "custom-search");
-            console.log(searchNodes)
-            $(searchNodes).each(function () {
-              var isSelected = false;
-              if (option.type == this.val) {
-                isSelected = true;
-              }
-              customNodeField.append(
-                $("<option>")
-                  .attr({"value": this.name, "endpoint":this.endpointUrl})
-                  .text(this.name)
-                  .prop("selected", isSelected)
-              );
-            });
-            // Custom Search Node Input form logic END here
-          } else if (e.target.value != "multiline") {
-            rowsField.val(undefined);
-            option.rows = null;
-            rowsField.css("visibility", "hidden");
-          } else {
-            rowsField.css("visibility", "visible");
-            if (!rowsField[0].value) rowsField[0].value = 3;
-          }
-        });
-
-        customNodeField.change(function (e) {
-
-          
-        });
-
         deleteButton.click(function () {
           container.find(".node-input-option-value").removeAttr("required");
           container.css({ background: "#fee" });
@@ -268,8 +290,8 @@
       });
 
       for (var i = 0; i < this.options.length; i++) {
-        var option = this.options[i];
-        generateOption(i + 1, option);
+        var option_x = this.options[i];
+        generateOption(i + 1, option_x);
       }
 
       $("#node-input-option-container").sortable({
@@ -291,9 +313,13 @@
           value: option.find(".node-input-option-value").val(), //typedInput('value'),
           type: option.find(".node-input-option-type").val(), //typedInput('value')
           required: option.find(".node-input-option-required").is(":checked"),
-          endpoint: option.find(".node-input-option-customNode").attr("endpoint")
+          endpoint: option.find(".node-input-option-customNode :selected").attr("endpoint"),
+          customNode: option.find(".node-input-option-customNode :selected").attr("customNode"),
           // rows: parseInt(option.find(".node-input-option-rows").val())
         };
+        if(option.find(".node-input-option-customNode").attr("selected")){
+
+        }
         // o.value= o.value||o.label||(o.type+"_"+i);
         node.formValue[o.value] =
           o.type == "checkbox" || o.type == "switch" ? false : "";
