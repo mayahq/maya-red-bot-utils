@@ -332,13 +332,6 @@
         intent += option.value + " ";
       });
       console.log(intent, node.name);
-      node.endpointUrl =
-        "/intent-" +
-        Math.random().toString(36).substring(2, 15) +
-        "-" +
-        Math.random().toString(36).substring(2, 15) +
-        "-" +
-        Math.random().toString(36).substring(2, 15);
       // node.name = intent
     },
   });

@@ -141,6 +141,14 @@ module.exports = function (RED) {
     function CustomSearch(config) {
       RED.nodes.createNode(this, config);
       var node = this;
+
+      node.endpointUrl =
+        "/search-" +
+        Math.random().toString(36).substring(2, 15) +
+        "-" +
+        Math.random().toString(36).substring(2, 15) +
+        "-" +
+        Math.random().toString(36).substring(2, 15);
   
       console.log("Testing..");
       if (RED.settings.httpNodeRoot !== false) {
