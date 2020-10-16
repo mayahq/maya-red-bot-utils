@@ -178,7 +178,7 @@
         if(option.type != "custom")
           customNodeField.css("visibility", "hidden")
         else {
-          var searchNodes = RED.view.getActiveNodes().filter(node => node.type === "custom");
+          var searchNodes = RED.view.getActiveNodes().filter(node => node.type === "custom-search");
                 $(searchNodes).each(function () {
                   var isSelected = false;
                   if(option.customNode == this.id){
