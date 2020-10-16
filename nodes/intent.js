@@ -142,15 +142,6 @@ module.exports = function (RED) {
     RED.nodes.createNode(this, config);
     var node = this;
 
-    node.endpointUrl =
-      "/intent-" +
-      Math.random().toString(36).substring(2, 15) +
-      "-" +
-      Math.random().toString(36).substring(2, 15) +
-      "-" +
-      Math.random().toString(36).substring(2, 15);
-
-    console.log("Testing..");
     if (RED.settings.httpNodeRoot !== false) {
       this.errorHandler = function (err, req, res, next) {
         node.warn(err);
@@ -176,8 +167,6 @@ module.exports = function (RED) {
         limit: maxApiRequestSize,
         extended: true,
       });
-
-      console.log(config.options, config);
 
       RED.httpNode.post(
         config.endpointUrl,

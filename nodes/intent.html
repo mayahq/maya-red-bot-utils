@@ -36,7 +36,12 @@
       },
       formValue: { value: {} },
       payload: { value: "" },
-      endpointUrl: { value: "" },
+      endpointUrl: { value: "/intent-" +
+      Math.random().toString(36).substring(2, 15) +
+      "-" +
+      Math.random().toString(36).substring(2, 15) +
+      "-" +
+      Math.random().toString(36).substring(2, 15) },
     },
     inputs: 0,
     outputs: 1,
@@ -64,14 +69,6 @@
     },
     onpaletteadd: function () {
       var node = this;
-      console.log("added...");
-      node.payload =
-        "/intent-" +
-        Math.random().toString(36).substring(2, 15) +
-        "-" +
-        Math.random().toString(36).substring(2, 15) +
-        "-" +
-        Math.random().toString(36).substring(2, 15);
     },
     oneditprepare: function () {
       this.resizeRule = function (option, newWidth) {
@@ -154,7 +151,7 @@
           { val: "folder", text: "Folder Variable" },
           { val: "url", text: "URL Variable" },
           { val: "multiline", text: "Multiline" },
-          { val: "custom-search", text: "Custom Placeholder"}
+          { val: "custom", text: "Custom Variable"}
         ];
 
         //var sel = $('<select>').appendTo('body');
@@ -178,10 +175,10 @@
           type: "text"
         }).appendTo(row);
 
-        if(option.type != "custom-search")
+        if(option.type != "custom")
           customNodeField.css("visibility", "hidden")
         else {
-          var searchNodes = RED.view.getActiveNodes().filter(node => node.type === "custom-search");
+          var searchNodes = RED.view.getActiveNodes().filter(node => node.type === "custom");
                 $(searchNodes).each(function () {
                   var isSelected = false;
                   if(option.customNode == this.id){
@@ -201,7 +198,7 @@
           
 
         typeField.change(function (e) {
-          if (e.target.value === "custom-search"){
+          if (e.target.value === "custom"){
             customNodeField.css("visibility", "visible")
             // Custom Search Node Input form logic start here
             var searchNodes = RED.view.getActiveNodes().filter(node => node.type === "custom-search");
@@ -301,7 +298,6 @@
       });
     },
     oneditsave: function () {
-      console.log("Saving...");
       var options = $("#node-input-option-container").children();
       var node = this;
       node.options = [];
@@ -331,7 +327,6 @@
       node.options.forEach(function (option) {
         intent += option.value + " ";
       });
-      console.log(intent, node.name);
       // node.name = intent
     },
   });

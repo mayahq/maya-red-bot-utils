@@ -18,12 +18,17 @@
     defaults: {
       name: { value: "", required: true },
       payload: { value: "" },
-      endpointUrl: { value: "" },
+      endpointUrl: { value: "/search-" +
+        Math.random().toString(36).substring(2, 15) +
+        "-" +
+        Math.random().toString(36).substring(2, 15) +
+        "-" +
+        Math.random().toString(36).substring(2, 15) },
     },
     inputs: 0,
     outputs: 1,
     icon: "inject.svg",
-    paletteLabel: "custom-search",
+    paletteLabel: "custom",
     label: function () {
       if (this.name) {
         return this.name;
@@ -36,9 +41,9 @@
             newLabel += "{ " + option.value + " : " + option.type + " } ";
           }
         });
-        return newLabel === "{  :  } " ? "custom-search" : newLabel;
+        return newLabel === "{  :  } " ? "custom" : newLabel;
       } else {
-        return "custom-search";
+        return "custom";
       }
     },
     labelStyle: function () {
