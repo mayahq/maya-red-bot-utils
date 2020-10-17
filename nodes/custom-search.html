@@ -18,12 +18,7 @@
     defaults: {
       name: { value: "", required: true },
       payload: { value: "" },
-      endpointUrl: { value: "/search-" +
-        Math.random().toString(36).substring(2, 15) +
-        "-" +
-        Math.random().toString(36).substring(2, 15) +
-        "-" +
-        Math.random().toString(36).substring(2, 15) },
+      endpointUrl: { value: "" },
     },
     inputs: 0,
     outputs: 1,
@@ -50,12 +45,13 @@
       return this.name ? "node_label_italic" : "";
     },
     oneditsave: function () {
-      // node.name = intent
+      var node = this;
+      var uniqueId = this.id.split(".").join("-");
+      node.endpointUrl = "/search-" + uniqueId;
     },
   });
 </script>
 <script type="text/html" data-template-name="custom-search">
-
   <div class="form-row">
     <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
     <input type="text" id="node-input-name" />
