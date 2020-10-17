@@ -45,7 +45,7 @@
       return this.name ? "node_label_italic" : "";
     },
     oneditsave: function () {
-      // node.name = intent
+      var node = this;
       var uniqueId = this.id.split(".").join("-");
       node.endpointUrl = "/search-" + uniqueId;
     },
