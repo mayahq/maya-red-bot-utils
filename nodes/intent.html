@@ -19,7 +19,9 @@
       name: { value: "" },
       order: { value: 0 },
       options: {
-        value: [{ value: "", type: "", required: true }],
+        value: [
+          { value: "", type: "", required: true, endpoint: "", searchNode: "" },
+        ],
         validate: function (value) {
           if (value.length) {
             for (var i = 0; i < value.length; i++) {
@@ -38,7 +40,7 @@
       payload: { value: "" },
       endpointUrl: { value: "" },
     },
-    inputs: 1,
+    inputs: 0,
     outputs: 1,
     icon: "inject.svg",
     paletteLabel: "bot-intent",
@@ -64,14 +66,6 @@
     },
     onpaletteadd: function () {
       var node = this;
-      console.log("added...");
-      node.payload =
-        "/intent-" +
-        Math.random().toString(36).substring(2, 15) +
-        "-" +
-        Math.random().toString(36).substring(2, 15) +
-        "-" +
-        Math.random().toString(36).substring(2, 15);
     },
     oneditprepare: function () {
       this.resizeRule = function (option, newWidth) {
@@ -121,7 +115,7 @@
         var valueField = $("<input/>", {
           class: valueClass,
           type: "text",
-          style: "margin-left:7px; width:30%;",
+          style: "margin-left:7px; width:20%;",
           placeholder: "e.g. name",
           value: option.value,
         }).appendTo(row); //.typedInput({default:'str',types:['str','num','bool']});
@@ -138,7 +132,7 @@
         var typeField = $("<select/>", {
           class: "node-input-option-type",
           type: "text",
-          style: "margin-left:7px; width:25%",
+          style: "margin-left:7px; width:20%",
         }).appendTo(row); //.typedInput({default:'str',types:['str', 'num']});
 
         var arr = [
@@ -154,6 +148,7 @@
           { val: "folder", text: "Folder Variable" },
           { val: "url", text: "URL Variable" },
           { val: "multiline", text: "Multiline" },
+          { val: "custom", text: "Custom Variable" },
         ];
 
         //var sel = $('<select>').appendTo('body');
@@ -170,13 +165,78 @@
           );
         });
 
+        var customNodeClass = "node-input-option-customNode";
+        var customNodeField = $("<select/>", {
+          class: customNodeClass,
+          style: "margin-left:7px; width:20%;",
+          type: "text",
+        }).appendTo(row);
+
+        if (option.type != "custom")
+          customNodeField.css("visibility", "hidden");
+        else {
+          var searchNodes = RED.view
+            .getActiveNodes()
+            .filter((node) => node.type === "custom-search");
+          $(searchNodes).each(function () {
+            var isSelected = false;
+            if (option.customNode == this.id) {
+              isSelected = true;
+            }
+            customNodeField.append(
+              $("<option>")
+                .attr("value", this.name)
+                .attr("endpoint", this.endpointUrl)
+                .attr("customNode", this.id)
+                .text(this.name)
+                .prop("selected", isSelected)
+            );
+          });
+          customNodeField.css("visibility", "visible");
+        }
+
+        typeField.change(function (e) {
+          if (e.target.value === "custom") {
+            customNodeField.css("visibility", "visible");
+            // Custom Search Node Input form logic start here
+            var searchNodes = RED.view
+              .getActiveNodes()
+              .filter((node) => node.type === "custom-search");
+            $(searchNodes).each(function () {
+              var isSelected = false;
+              if (option.customNode == this.id) {
+                isSelected = true;
+              }
+              customNodeField.append(
+                $("<option>")
+                  .attr("value", this.name)
+                  .attr("endpoint", this.endpointUrl)
+                  .attr("customNode", this.id)
+                  .text(this.name)
+                  .prop("selected", isSelected)
+              );
+            });
+          } else {
+            customNodeField.empty();
+            customNodeField.css("visibility", "hidden");
+          }
+          if (e.target.value != "multiline") {
+            rowsField.val(undefined);
+            option.rows = null;
+            rowsField.css("visibility", "hidden");
+          } else {
+            rowsField.css("visibility", "visible");
+            if (!rowsField[0].value) rowsField[0].value = 3;
+          }
+        });
+
         //var labelForRequried = $('<span/>',{style:"margin: 10px;"}).text('Required').appendTo(row);
         var requiredContainer = $("<div/>", {
           style:
-            "display:inline-block; height:34px; width:18%; vertical-align: middle",
+            "display:inline-block; height:34px; width:15%; vertical-align: middle",
         }).appendTo(row);
         var requiredInnerContainer = $("<div/>", {
-          style: "left:35%; position:relative; width:30px",
+          style: "left:25%; position:relative; width:20px",
         }).appendTo(requiredContainer);
         var reqRow = $("<label />", {
           class: "switch",
@@ -191,28 +251,25 @@
         }).appendTo(reqRow); //labelForRequried);//.typedInput({default:'str',types:['str', 'num']});
         var reqDiv = $("<div />", { class: "slider round" }).appendTo(reqRow);
         var vis = option.rows ? "visible" : "hidden";
-        //var rowsField = $('<input/>',{class:"node-input-option-rows", type:"number", style:"width:10%;", placeholder:'Rows', value:option.rows }).css('visibility',vis).appendTo(row);
+        var rowsField = $("<input/>", {
+          class: "node-input-option-rows",
+          type: "number",
+          style: "width:10%;",
+          placeholder: "Rows",
+          value: option.rows,
+        })
+          .css("visibility", vis)
+          .appendTo(row);
 
         var finalspan = $("<div/>", {
-          style: "display:inline-block; width:5%; margin-left:15px;",
+          style: "display:inline-block; width:5%; margin-left:10px;",
         }).appendTo(row);
         var deleteButton = $("<a/>", {
           href: "#",
           class: "editor-button",
-          style: "font-size:1.3em; left:45%; position:relative;",
+          style: "font-size:1.3em; left:5%; position:relative;",
         }).appendTo(finalspan);
         $("<i/>", { class: "fa fa-trash-o" }).appendTo(deleteButton);
-
-        typeField.change(function (e) {
-          if (e.target.value != "multiline") {
-            rowsField.val(undefined);
-            option.rows = null;
-            rowsField.css("visibility", "hidden");
-          } else {
-            rowsField.css("visibility", "visible");
-            if (!rowsField[0].value) rowsField[0].value = 3;
-          }
-        });
 
         deleteButton.click(function () {
           container.find(".node-input-option-value").removeAttr("required");
@@ -238,8 +295,8 @@
       });
 
       for (var i = 0; i < this.options.length; i++) {
-        var option = this.options[i];
-        generateOption(i + 1, option);
+        var option_x = this.options[i];
+        generateOption(i + 1, option_x);
       }
 
       $("#node-input-option-container").sortable({
@@ -249,7 +306,6 @@
       });
     },
     oneditsave: function () {
-      console.log("Saving...");
       var options = $("#node-input-option-container").children();
       var node = this;
       node.options = [];
@@ -261,8 +317,16 @@
           value: option.find(".node-input-option-value").val(), //typedInput('value'),
           type: option.find(".node-input-option-type").val(), //typedInput('value')
           required: option.find(".node-input-option-required").is(":checked"),
+          endpoint: option
+            .find(".node-input-option-customNode :selected")
+            .attr("endpoint"),
+          customNode: option
+            .find(".node-input-option-customNode :selected")
+            .attr("customNode"),
           // rows: parseInt(option.find(".node-input-option-rows").val())
         };
+        if (option.find(".node-input-option-customNode").attr("selected")) {
+        }
         // o.value= o.value||o.label||(o.type+"_"+i);
         node.formValue[o.value] =
           o.type == "checkbox" || o.type == "switch" ? false : "";
@@ -274,15 +338,9 @@
       node.options.forEach(function (option) {
         intent += option.value + " ";
       });
-      console.log(intent, node.name);
-      node.endpointUrl =
-        "/intent-" +
-        Math.random().toString(36).substring(2, 15) +
-        "-" +
-        Math.random().toString(36).substring(2, 15) +
-        "-" +
-        Math.random().toString(36).substring(2, 15);
       // node.name = intent
+      var uniqueId = this.id.split(".").join("-");
+      node.endpointUrl = "/intent-" + uniqueId;
     },
   });
 </script>
@@ -367,22 +425,23 @@
         style="width:100%; display: inline-block; padding-top:10px; padding-buttom:10px; border-top:0px solid; border-radius:5px 5px 0 0; border-bottom:1px solid #ccc;"
       >
         <div style="width:94%; display:inline-block; margin-left:27px">
-          <div
-            style="width:25%; text-align:center; float:left; margin-left:9px"
-          >
+          <div style="width:20%; text-align:left; float:left; margin-left:5px">
             Name
           </div>
           <div
-            style="margin-left:40px; width:20%; text-align:center; float:left; "
+            style="margin-left:5px; width:20%; text-align:left; float:left; "
           >
             Type
           </div>
           <div
-            style="width:15%;text-align:center;float:left;margin-left: 34px;"
+            style="margin-left:5px; width:20%; text-align:left; float:left; "
           >
+            Custom Search
+          </div>
+          <div style="width:15%;text-align:center;float:left;margin-left: 5px;">
             Required
           </div>
-          <div style="width:20%; text-align:center; float:left;">Remove</div>
+          <div style="width:10%; text-align:right; float:right;">Remove</div>
         </div>
       </div>
       <div
