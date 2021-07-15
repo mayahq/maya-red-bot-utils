@@ -12,61 +12,59 @@
 -->
 
 <script type="text/javascript">
-    RED.nodes.registerType('bot-dash-card',{
-        category: 'botutils',
-        color:'#d8bfd8',
-        defaults: {
-            name: {value:'bot-dash-card'},
-            group: {type: 'ui_group', required: true},
-            header:  {value:"", validate: RED.validators.typedInput("headerType")},
-            headerType: {value:"global"},
-        },
-        inputs:1,
-        outputs:0,
-        align: "right",
-        icon: "white-globe.svg",
-        label: function() {
-            return this.name;
-        },
-        labelStyle: function() {
-            return this.name?"node_label_italic":"";
-        },
-        oneditprepare: function() {
-            if (this.headerType === null) {
-            if (this.header === "") {
-                this.headerType = "date";
-            } else {
-                this.headerType = "str";
-            }
-            } else if (this.headerType === 'string' || this.headerType === 'none') {
-                this.headerType = "str";
-            }
-            $("#node-input-headerType").val(this.headerType);
-            $("#node-input-header").typedInput({
-                default: 'str',
-                typeField: $("#node-input-headerType"),
-                types:['flow','global','msg','str']
-            });
+  RED.nodes.registerType("bot-dash-card", {
+    category: "botutils",
+    color: "#d8bfd8",
+    defaults: {
+      name: { value: "bot-dash-card" },
+      group: { type: "ui_group", required: true },
+      header: { value: "", validate: RED.validators.typedInput("headerType") },
+      headerType: { value: "str" },
+    },
+    inputs: 1,
+    outputs: 0,
+    align: "right",
+    icon: "white-globe.svg",
+    label: function () {
+      return this.name;
+    },
+    labelStyle: function () {
+      return this.name ? "node_label_italic" : "";
+    },
+    oneditprepare: function () {
+      if (this.headerType === null) {
+        if (this.header === "") {
+          this.headerType = "date";
+        } else {
+          this.headerType = "str";
+        }
+      } else if (this.headerType === "string" || this.headerType === "none") {
+        this.headerType = "str";
+      }
+      $("#node-input-headerType").val(this.headerType);
+      $("#node-input-header").typedInput({
+        default: "str",
+        typeField: $("#node-input-headerType"),
+        types: ["flow", "global", "msg", "str"],
+      });
 
-            $("#node-input-header").typedInput('type',this.headerType);
-        },
-    });
+      $("#node-input-header").typedInput("type", this.headerType);
+    },
+  });
 </script>
 
 <script type="text/html" data-template-name="bot-dash-card">
-    <div class="form-row">
-        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name">Name</span></label>
-        <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.name">
-    </div>
-    <div class="form-row">
-        <label for="node-input-group"><i class="fa fa-table"></i> Group</label>
-        <input type="text" id="node-input-group">
-    </div>
-    <div class="form-row">
-        <label for="node-input-header">Card Header</label>
-        <input type="text" id="node-input-header"></input>
-        <input type="hidden" id="node-input-headerType">
-    </div>
-    
-    <div class="form-tips"><span data-i18n="[html]httpin.tip.res"></span></div>
+  <div class="form-row">
+      <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name">Name</span></label>
+      <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.name">
+  </div>
+  <div class="form-row">
+      <label for="node-input-group"><i class="fa fa-table"></i> Group</label>
+      <input type="text" id="node-input-group">
+  </div>
+  <div class="form-row">
+      <label for="node-input-header">Card Header</label>
+      <input type="text" id="node-input-header"></input>
+      <input type="hidden" id="node-input-headerType">
+  </div>
 </script>

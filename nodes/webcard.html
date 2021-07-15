@@ -12,81 +12,79 @@
 -->
 
 <script type="text/javascript">
-    RED.nodes.registerType('bot-web-card',{
-        category: 'botutils',
-        color:'#d8bfd8',
-        defaults: {
-            name: {value:'bot-web-card'},
-            header:  {value:"", validate: RED.validators.typedInput("headerType")},
-            headerType: {value:"global"},
-            url:  {value:"", validate: RED.validators.typedInput("payloadTypeUrl")},
-            payloadTypeUrl: {value:"global"},
-        },
-        inputs:1,
-        outputs:0,
-        align: "right",
-        icon: "white-globe.svg",
-        label: function() {
-            return this.name;
-        },
-        labelStyle: function() {
-            return this.name?"node_label_italic":"";
-        },
-        oneditprepare: function() {
-            if (this.payloadTypeUrl === null) {
-            if (this.url === "") {
-                this.payloadTypeUrl = "date";
-            } else {
-                this.payloadTypeUrl = "str";
-            }
-            } else if (this.payloadTypeUrl === 'string' || this.payloadTypeUrl === 'none') {
-                this.payloadTypeUrl = "str";
-            }
-            $("#node-input-payloadTypeUrl").val(this.payloadTypeUrl);
-            $("#node-input-url").typedInput({
-                default: 'str',
-                typeField: $("#node-input-payloadTypeUrl"),
-                types:['flow','global','msg','str']
-            });
+  RED.nodes.registerType("bot-web-card", {
+    category: "botutils",
+    color: "#d8bfd8",
+    defaults: {
+      name: { value: "bot-web-card" },
+      header: { value: "", validate: RED.validators.typedInput("headerType") },
+      headerType: { value: "str" },
+      url: { value: "", validate: RED.validators.typedInput("urlType") },
+      urlType: { value: "str" },
+    },
+    inputs: 1,
+    outputs: 0,
+    align: "right",
+    icon: "white-globe.svg",
+    label: function () {
+      return this.name;
+    },
+    labelStyle: function () {
+      return this.name ? "node_label_italic" : "";
+    },
+    oneditprepare: function () {
+      if (this.urlType === null) {
+        if (this.url === "") {
+          this.urlType = "date";
+        } else {
+          this.urlType = "str";
+        }
+      } else if (this.urlType === "string" || this.urlType === "none") {
+        this.urlType = "str";
+      }
+      $("#node-input-urlType").val(this.urlType);
+      $("#node-input-url").typedInput({
+        default: "str",
+        typeField: $("#node-input-urlType"),
+        types: ["flow", "global", "msg", "str"],
+      });
 
-            $("#node-input-url").typedInput('type',this.payloadTypeUrl);
+      $("#node-input-url").typedInput("type", this.urlType);
 
-            if (this.headerType === null) {
-            if (this.header === "") {
-                this.headerType = "date";
-            } else {
-                this.headerType = "str";
-            }
-            } else if (this.headerType === 'string' || this.headerType === 'none') {
-                this.headerType = "str";
-            }
-            $("#node-input-headerType").val(this.headerType);
-            $("#node-input-header").typedInput({
-                default: 'str',
-                typeField: $("#node-input-headerType"),
-                types:['flow','global','msg','str']
-            });
+      if (this.headerType === null) {
+        if (this.header === "") {
+          this.headerType = "date";
+        } else {
+          this.headerType = "str";
+        }
+      } else if (this.headerType === "string" || this.headerType === "none") {
+        this.headerType = "str";
+      }
+      $("#node-input-headerType").val(this.headerType);
+      $("#node-input-header").typedInput({
+        default: "str",
+        typeField: $("#node-input-headerType"),
+        types: ["flow", "global", "msg", "str"],
+      });
 
-            $("#node-input-header").typedInput('type',this.headerType);
-        },
-    });
+      $("#node-input-header").typedInput("type", this.headerType);
+    },
+  });
 </script>
 
 <script type="text/html" data-template-name="bot-web-card">
-    <div class="form-row">
-        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name">Name</span></label>
-        <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.name">
-    </div>
-    <div class="form-row">
-        <label for="node-input-header">Card Header</label>
-        <input type="text" id="node-input-header"></input>
-        <input type="hidden" id="node-input-headerType">
-    </div>
-    <div class="form-row">
-        <label for="node-input-url">URL</label>
-        <input type="text" id="node-input-url"></input>
-        <input type="hidden" id="node-input-payloadTypeUrl">
-    </div>
-    
-    <div class="form-tips"><span data-i18n="[html]httpin.tip.res"></span></div>
+  <div class="form-row">
+      <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name">Name</span></label>
+      <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.name">
+  </div>
+  <div class="form-row">
+      <label for="node-input-header">Card Header</label>
+      <input type="text" id="node-input-header"></input>
+      <input type="hidden" id="node-input-headerType">
+  </div>
+  <div class="form-row">
+      <label for="node-input-url">URL</label>
+      <input type="text" id="node-input-url"></input>
+      <input type="hidden" id="node-input-urlType">
+  </div>
 </script>

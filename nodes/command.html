@@ -12,7 +12,7 @@
 -->
 
 <script type="text/javascript">
-  RED.nodes.registerType("bot-intent", {
+  RED.nodes.registerType("bot-command", {
     category: "botutils",
     color: "#d8bfd8",
     defaults: {
@@ -43,7 +43,7 @@
     inputs: 0,
     outputs: 1,
     icon: "inject.svg",
-    paletteLabel: "bot-intent",
+    paletteLabel: "bot-command",
     label: function () {
       if (this.name) {
         return this.name;
@@ -56,9 +56,9 @@
             newLabel += "{ " + option.value + " : " + option.type + " } ";
           }
         });
-        return newLabel === "{  :  } " ? "bot-intent" : newLabel;
+        return newLabel === "{  :  } " ? "bot-command" : newLabel;
       } else {
-        return "bot-intent";
+        return "bot-command";
       }
     },
     labelStyle: function () {
@@ -74,9 +74,9 @@
         //  option.find(".node-input-option-value").width(newWidth);
       };
 
-      // This generates the preview for the intent
+      // This generates the preview for the command
       function generatePreviews(options) {
-        var previews = $("#node-input-intent-preview");
+        var previews = $("#node-input-command-preview");
         var htmlElem = "<p>";
         options.forEach(function (option) {
           if (option.type === "prompt") {
@@ -136,18 +136,12 @@
         }).appendTo(row); //.typedInput({default:'str',types:['str', 'num']});
 
         var arr = [
-          { val: "prompt", text: "Intent Prompt" },
-          { val: "number", text: "Number Variable" },
+          { val: "prompt", text: "Text Prompt" },
           { val: "string", text: "String Variable" },
           { val: "email", text: "E-mail Variable" },
           { val: "phone", text: "Phone Variable" },
           { val: "time", text: "Time Variable" },
           { val: "timerange", text: "Time Range Variable" },
-          { val: "app", text: "App Variable" },
-          { val: "file", text: "File Variable" },
-          { val: "folder", text: "Folder Variable" },
-          { val: "url", text: "URL Variable" },
-          { val: "multiline", text: "Multiline" },
           { val: "custom", text: "Custom Variable" },
         ];
 
@@ -333,18 +327,18 @@
         node.options.push(o);
       });
 
-      var intent = "";
+      var command = "";
 
       node.options.forEach(function (option) {
-        intent += option.value + " ";
+        command += option.value + " ";
       });
-      // node.name = intent
+      // node.name = command
       var uniqueId = this.id.split(".").join("-");
-      node.endpointUrl = "/intent-" + uniqueId;
+      node.endpointUrl = "/command-" + uniqueId;
     },
   });
 </script>
-<script type="text/html" data-template-name="bot-intent">
+<script type="text/html" data-template-name="bot-command">
   <style>
     .switch {
       position: relative;
@@ -405,17 +399,17 @@
     }
   </style>
   <div class="form-row" style="display:flex">
-    <label for="node-input-intent-preview"
+    <label for="node-input-command-preview"
       ><i class="fa fa-tag"></i> Preview</label
     >
-    <div id="node-input-intent-preview"></div>
+    <div id="node-input-command-preview"></div>
   </div>
   <div
     class="form-row node-input-option-container-row"
     style="margin-bottom:0px; width:100%; min-width:700px"
   >
     <label style="vertical-align:top;"
-      ><i class="fa fa-list-alt"></i> Intent Components</label
+      ><i class="fa fa-list-alt"></i> Command Components</label
     >
     <div
       style="display:inline-block; width:78%; border:1px solid #ccc; border-radius:5px; box-sizing:border-box;"
@@ -471,7 +465,7 @@
   </div>
 </script>
 
-<script type="text/html" data-help-name="bot-intent">
+<script type="text/html" data-help-name="bot-command">
   <p>Adds a form to user interface.</p>
   <p>
     Helps to collect multiple value from the user on submit button click as an

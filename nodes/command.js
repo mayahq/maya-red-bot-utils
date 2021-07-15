@@ -138,7 +138,7 @@ module.exports = function (RED) {
     RED.httpNode.options("*", corsHandler);
   }
 
-  function BotIntent(config) {
+  function BotCommand(config) {
     RED.nodes.createNode(this, config);
     var node = this;
 
@@ -157,6 +157,7 @@ module.exports = function (RED) {
             req: req,
             res: createResponseWrapper(node, res),
             payload: req.body,
+            _taskid: req.body.taskId,
           },
           false
         );
@@ -194,5 +195,5 @@ module.exports = function (RED) {
       this.warn(RED._("httpin.errors.not-created"));
     }
   }
-  RED.nodes.registerType("bot-intent", BotIntent);
+  RED.nodes.registerType("bot-command", BotCommand);
 };

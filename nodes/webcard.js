@@ -22,7 +22,7 @@ module.exports = function (RED) {
     RED.nodes.createNode(this, config);
     var node = this;
     this.url = config.url;
-    this.payloadTypeUrl = config.payloadTypeUrl;
+    this.urlType = config.urlType;
     this.header = config.header;
     this.headerType = config.headerType;
 
@@ -31,18 +31,21 @@ module.exports = function (RED) {
         if (valueType === "str") {
           resolve(value);
         } else {
-          RED.util.evaluateNodeProperty(value, valueType, this, msg, function (
-            err,
-            res
-          ) {
-            console.log(err, res);
-            if (err) {
-              node.error(err.msg);
-              reject(err.msg);
-            } else {
-              resolve(res);
+          RED.util.evaluateNodeProperty(
+            value,
+            valueType,
+            this,
+            msg,
+            function (err, res) {
+              console.log(err, res);
+              if (err) {
+                node.error(err.msg);
+                reject(err.msg);
+              } else {
+                resolve(res);
+              }
             }
-          });
+          );
         }
       });
     }
@@ -99,6 +102,7 @@ module.exports = function (RED) {
         let header = await getValue(this.header, this.headerType, msg);
         console.log(url, header);
         let payload = {
+          _taskid: msg._taskid,
           type: "card",
           payload: {
             mode: "web",

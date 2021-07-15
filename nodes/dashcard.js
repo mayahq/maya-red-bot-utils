@@ -37,18 +37,21 @@ module.exports = function (RED) {
         if (valueType === "str") {
           resolve(value);
         } else {
-          RED.util.evaluateNodeProperty(value, valueType, this, msg, function (
-            err,
-            res
-          ) {
-            console.log(err, res);
-            if (err) {
-              node.error(err.msg);
-              reject(err.msg);
-            } else {
-              resolve(res);
+          RED.util.evaluateNodeProperty(
+            value,
+            valueType,
+            this,
+            msg,
+            function (err, res) {
+              console.log(err, res);
+              if (err) {
+                node.error(err.msg);
+                reject(err.msg);
+              } else {
+                resolve(res);
+              }
             }
-          });
+          );
         }
       });
     }
@@ -103,6 +106,7 @@ module.exports = function (RED) {
         var statusCode = 200;
         let header = await getValue(this.header, this.headerType, msg);
         let payload = {
+          _taskid: msg._taskid,
           type: "card",
           payload: {
             mode: "tab",
