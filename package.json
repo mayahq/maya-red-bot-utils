@@ -21,7 +21,7 @@
   ],
   "node-red": {
     "nodes": {
-      "bot-intent": "nodes/intent.js",
+      "bot-command": "nodes/command.js",
       "bot-response": "nodes/response.js",
       "bot-web-card": "nodes/webcard.js",
       "bot-dash-card": "nodes/dashcard.js",

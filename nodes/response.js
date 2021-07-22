@@ -21,11 +21,37 @@ module.exports = function (RED) {
   function BotResponse(config) {
     RED.nodes.createNode(this, config);
     var node = this;
-    this.headers = config.headers || {};
-    this.statusCode = config.statusCode;
-    this.on("input", function (msg) {
+    this.status = config.status;
+    this.statusMsg = config.statusMsg;
+    this.statusMsgType = config.statusMsgType;
+
+    async function getValue(value, valueType, msg) {
+      return new Promise(function (resolve, reject) {
+        if (valueType === "str") {
+          resolve(value);
+        } else {
+          RED.util.evaluateNodeProperty(
+            value,
+            valueType,
+            this,
+            msg,
+            function (err, res) {
+              console.log(err, res);
+              if (err) {
+                node.error(err.msg);
+                reject(err.msg);
+              } else {
+                resolve(res);
+              }
+            }
+          );
+        }
+      });
+    }
+
+    this.on("input", async function (msg) {
       if (msg.res) {
-        var headers = RED.util.cloneMessage(node.headers);
+        var headers = {};
         if (msg.headers) {
           if (msg.headers.hasOwnProperty("x-node-red-request-node")) {
             var headerHash = msg.headers["x-node-red-request-node"];
@@ -70,29 +96,20 @@ module.exports = function (RED) {
             }
           }
         }
-        var statusCode = node.statusCode || msg.statusCode || 200;
-        if (typeof msg.payload == "object" && !Buffer.isBuffer(msg.payload)) {
-          msg.res._res.status(statusCode).jsonp(msg.payload);
-        } else {
-          if (msg.res._res.get("content-length") == null) {
-            var len;
-            if (msg.payload == null) {
-              len = 0;
-            } else if (Buffer.isBuffer(msg.payload)) {
-              len = msg.payload.length;
-            } else if (typeof msg.payload == "number") {
-              len = Buffer.byteLength("" + msg.payload);
-            } else {
-              len = Buffer.byteLength(msg.payload);
-            }
-            msg.res._res.set("content-length", len);
-          }
+        var statusCode = 200;
+        let status = this.status;
+        let statusMsg = await getValue(this.statusMsg, this.statusMsgType, msg);
 
-          if (typeof msg.payload === "number") {
-            msg.payload = "" + msg.payload;
-          }
-          msg.res._res.status(statusCode).send(msg.payload);
-        }
+        let payload = {
+          _taskid: msg._taskid,
+          type: "status",
+          payload: {
+            status: status,
+            message: statusMsg,
+          },
+        };
+
+        msg.res._res.status(statusCode).jsonp(payload);
       } else {
         node.warn(RED._("httpin.errors.no-response"));
       }
