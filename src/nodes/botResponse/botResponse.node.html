@@ -1,0 +1,108 @@
+<script type='text/javascript'>
+    RED.nodes.registerType("bot-response", {
+        category: "Maya Red Bot Utils",
+        color: "#8BBDD9",
+        defaults: {
+            name: {
+                value: ""
+            },
+            isProfileConfigNode: {
+                value: false
+            },
+            status: {
+                value: "success"
+            },
+            statusMsg: {
+                value: "Success!"
+            },
+            payloadTypestatusMsg: {
+                value: "str"
+            },
+        },
+        inputs: 1,
+        outputs: 0,
+        icon: "fa-file-code-o.png",
+        label: function() {
+            return this.name || "bot-response"
+        },
+        paletteLabel: "bot-response",
+        exportable: true,
+        oneditprepare: function() {
+            const statusselectFieldValues = ["success", "loading", "error"]
+            statusselectFieldValues.forEach((val) => {
+                $("#node-input-status").append($("<option></option>").attr("value", val).text(val))
+            })
+            $("#node-input-status").val(this.status)
+
+            if (this.payloadTypestatusMsg === null) {
+                if (this.statusMsg === "") {
+                    this.payloadTypestatusMsg = "date"
+                } else {
+                    this.payloadTypestatusMsg = "str"
+                }
+            } else if (this.payloadTypestatusMsg === 'string' || this.payloadTypestatusMsg === 'none') {
+                this.payloadTypestatusMsg = "str"
+            }
+
+            $("#node-input-payloadTypestatusMsg").val(this.payloadTypestatusMsg)
+            $("#node-input-statusMsg").typedInput({
+                default: "str",
+                typeField: $("#node-input-payloadTypestatusMsg"),
+                types: ["msg", "flow", "global", "str"]
+            })
+            $("#node-input-statusMsg").typedInput("type", this.payloadTypestatusMsg)
+
+        },
+        oneditsave: function() {},
+        oneditcancel: function() {},
+        oneditdelete: function() {},
+        oneditresize: function() {},
+        onpaletteadd: function() {},
+        onpaletteremove: function() {}
+    });
+</script>
+
+<script type="text/html" data-template-name="bot-response">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" style="width:70%;" placeholder="Name" />
+    </div>
+    <div class="form-row">
+        <label for="node-input-status">status</label>
+        <select type="text" id="node-input-status">
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-statusMsg">statusMsg</label>
+        <input type="text" id="node-input-statusMsg"></input>
+        <input type="hidden" id="node-input-payloadTypestatusMsg">
+    </div>
+</script>
+
+<script type="text/html" data-help-name="bot-response">
+    <h2>Description</h2>
+    <p>Query opens tabs based on criteria like URL, muted status</p>
+
+    <h2>Config</h2>
+    <dl class="message-properties">
+
+        <dt>payload<span class="property-type">various</span></dt>
+        <dd>The configured payload of the message.</dd>
+
+        <dt class="optional">topic <span class="property-type">string</span></dt>
+        <dd>An optional property</dd>
+
+    </dl>
+
+
+    <h2>Outputs</h2>
+    <dl class="message-properties">
+
+        <dt>payload<span class="property-type">various</span></dt>
+        <dd>The configured payload of the message.</dd>
+
+        <dt class="optional">topic <span class="property-type">string</span></dt>
+        <dd>An optional property</dd>
+
+    </dl>
+</script>

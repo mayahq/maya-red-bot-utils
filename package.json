@@ -19,14 +19,16 @@
     "bot-utils",
     "actions"
   ],
+  "nodepath": "src/nodes",
+  "nodeRedModuleName": "maya-red-bot-utils",
   "node-red": {
     "nodes": {
-      "bot-command": "nodes/command.js",
-      "bot-response": "nodes/response.js",
-      "bot-web-card": "nodes/webcard.js",
-      "bot-dash-card": "nodes/dashcard.js",
-      "bot-custom-search": "nodes/custom-search.js",
-      "bot-custom-search-response": "nodes/custom-search-response.js"
+      "bot-command": "src/nodes/botCommand/botCommand.node.js",
+      "bot-response": "src/nodes/botResponse/botResponse.node.js",
+      "bot-web-card": "src/nodes/botWebCard/botWebCard.node.js",
+      "bot-dash-card": "src/nodes/botDashCard/botDashCard.node.js",
+      "bot-custom-search": "src/nodes/botCustomSearch/botCustomSearch.node.js",
+      "bot-custom-search-response": "src/nodes/botCustomSearchResponse/botCustomSearchResponse.node.js"
     }
   },
   "dependencies": {
@@ -42,6 +44,7 @@
     "multer": "^1.4.2",
     "on-headers": "^1.0.2",
     "raw-body": "^2.4.1",
-    "vm": "^0.1.0"
+    "vm": "^0.1.0",
+    "@mayahq/module-sdk": "^0.4.5"
   }
 }
