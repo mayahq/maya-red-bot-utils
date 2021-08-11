@@ -1,8 +1,9 @@
 const {
     Node,
-    Schema
-} = require('@mayahq/module-sdk')
-
+    Schema,
+    fields
+} = require('@mayahq/module-sdk');
+var hashSum = require("hash-sum");
 class BotDashCard extends Node {
     constructor(node, RED, opts) {
         super(node, RED, {
@@ -17,7 +18,7 @@ class BotDashCard extends Node {
         category: 'Maya Red Bot Utils',
         isConfig: false,
         fields: {
-            // Whatever custom fields the node needs.
+            header: 
         },
 
     })
