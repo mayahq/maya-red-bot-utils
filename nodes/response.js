@@ -96,9 +96,19 @@ module.exports = function (RED) {
             }
           }
         }
-        var statusCode = 200;
-        let status = this.status;
-        let statusMsg = await getValue(this.statusMsg, this.statusMsgType, msg);
+        var statusCode, status, statusMsg, error;
+
+        if (msg.__isError) {
+          statusCode = 200;
+          status = "error";
+          statusMsg = "Error!";
+          error = msg.__error;
+        }
+        else {
+          statusCode = 200;
+          status = this.status;
+          statusMsg = await getValue(this.statusMsg, this.statusMsgType, msg);
+        }
 
         let payload = {
           _taskid: msg._taskid,
@@ -106,6 +116,7 @@ module.exports = function (RED) {
           payload: {
             status: status,
             message: statusMsg,
+            error
           },
         };
 
