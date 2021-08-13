@@ -98,7 +98,7 @@ module.exports = function (RED) {
           }
         }
         var statusCode = 200;
-        let url = await getValue(this.url, this.payloadTypeUrl, msg);
+        let url = await getValue(this.url, this.urlType, msg);
         let header = await getValue(this.header, this.headerType, msg);
 
         let payload = {
