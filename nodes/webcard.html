@@ -88,3 +88,23 @@
       <input type="hidden" id="node-input-urlType">
   </div>
 </script>
+
+<script type="text/html" data-help-name="bot-web-card">
+  <h2 data-type="description-title">Description</h2>
+  <p data-type="description-summary">Responds to Maya command bar with a web page rendered in the cards</p>
+  <h2>Config</h2>
+  <dl class="message-properties">
+
+    <dt>
+        <span class="property-name">url</span>
+        <span class="property-type">str</span>
+    </dt>
+    <dd>URL string either fetched dynamically from <code>msg</code> input or from <code>flow</code>/<code>global</code> to view on the command bar as response to command invocation</dd>
+
+    <dt>
+        <span class="property-name">header</span>
+        <span class="property-type">url</span>
+    </dt>
+    <dd>Header to show on the command bar window for the URL view</dd>
+  </dl>
+</script>
