@@ -26,7 +26,8 @@
       "bot-web-card": "nodes/webcard.js",
       "bot-dash-card": "nodes/dashcard.js",
       "bot-custom-search": "nodes/custom-search.js",
-      "bot-custom-search-response": "nodes/custom-search-response.js"
+      "bot-custom-search-response": "nodes/custom-search-response.js",
+      "bot-events": "nodes/events.js"
     }
   },
   "dependencies": {
