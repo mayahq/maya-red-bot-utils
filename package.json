@@ -27,7 +27,7 @@
       "bot-dash-card": "nodes/dashcard.js",
       "bot-custom-search": "nodes/custom-search.js",
       "bot-custom-search-response": "nodes/custom-search-response.js",
-      "bot-events": "nodes/events.js"
+      "bot-events": "nodes/scheduler.js"
     }
   },
   "dependencies": {
@@ -43,6 +43,11 @@
     "multer": "^1.4.3",
     "on-headers": "^1.0.2",
     "raw-body": "^2.4.1",
-    "vm": "^0.1.0"
+    "vm": "^0.1.0",
+    "coord-parser": "^1.0.0",
+    "cronosjs": "^1.7.1",
+    "cronstrue": "^1.111.0",
+    "pretty-ms": "^7.0.1",
+    "suncalc2": "^1.8.1"
   }
 }
