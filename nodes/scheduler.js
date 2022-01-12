@@ -1524,7 +1524,6 @@ module.exports = function (RED) {
 					deleteTask(node, opt.name);
 				}
 				let taskCount = node.tasks ? node.tasks.length : 0;
-				console.log(node, opt, taskCount, !isDynamic, false);
 				let t = createTask(node, opt, taskCount, !isDynamic, false);
 				if (t) {
 					if (modified) t.node_modified = true;
@@ -1637,7 +1636,6 @@ module.exports = function (RED) {
 					let x = node.options.find((o) => o.name === task.name);
 					if(x) {opt.autostart = x.autostart}
 				}
-				console.log(opt.autostart, isRedeploy)
 				if(opt.autostart && isRedeploy){
 					task.stop(); //prevent bug where calling start without first calling stop causes events to bunch up
 					task.start();
@@ -1680,7 +1678,6 @@ module.exports = function (RED) {
 					}
 					return t;
 				})
-				console.log(node.options)
 				let exp = (t) => exportTask(t, false);
 				let dynNodesExp = dynNodes.map(exp);
 				/*if(!dynNodesExp || !dynNodesExp.length){
@@ -1726,7 +1723,6 @@ module.exports = function (RED) {
 						for (let iOpt = 0; iOpt < data.schedules.length; iOpt++) {
 							let opt = data.schedules[iOpt];
 							opt.name = opt.name || opt.topic;
-							console.log(opt);
 							if(opt.isRunning && opt.type === 'static'){
 								createTask(node, opt, iOpt, true, isRedeploy);
 							} else if (opt.isRunning && opt.type === 'dynamic') {
@@ -1821,7 +1817,6 @@ module.exports = function (RED) {
 				});
 		
 				// Endpoints for node apis accessible to dashboard
-				console.log(node.endpointUrl)
 				RED.httpNode.post(
 					node.endpointUrl,
 					corsHandler,
