@@ -1,0 +1,118 @@
+<script type="text/javascript">
+	RED.nodes.registerType("bot-info", {
+		category: "botutils",
+		color: "#d8bfd8",
+		defaults: {
+			name: { value: "" },
+			description: { value: "" },
+			created: { value: new Date().toLocaleString('en', { year: 'numeric', month: 'long', day: 'numeric' }) },
+			compatibility: { value: [] },
+			developer: { value: "" },
+		},
+		inputs: 0,
+		outputs: 0,
+		icon: "comment.svg",
+		label: "bot-info",
+		labelStyle: function () {
+			return this.name ? "node_label_italic" : "";
+		},
+		info: function () {
+			return this.name ? "# " + this.name + "\n\n---\n\n" : "";
+		},
+		oneditprepare: function () {
+			var node = this;
+			let selectionList = [
+				{
+					label: "MacOS",
+					value: "macos",
+				},
+				{
+					label: "Windows",
+					value: "windows",
+				},
+				{
+					label: "Linux",
+					value: "linux",
+				},
+				{
+					label: "Maya Cloud",
+					value: "cloud",
+				},
+			];
+
+			let selected = this.compatibility || [];
+
+			let div = $.find("#compatibility")[0];
+
+            let label = $(`<label for="node-input-compatibility-l"><i class="fa fa-tag"></i> Compatibility</label>`).appendTo(div);
+            let select = $(`<select type="text" id="node-input-compatibility-l" multiple></select>`).appendTo(div);
+
+			selectionList.forEach((s) => {
+                let selectOpt;
+                let x = selected.find((f) => f.value === s.value);
+                if(x){
+                    selectOpt = $(`<option value="${s.value}" selected>${s.label}</option>`);
+                } else {
+                    selectOpt = $(`<option value="${s.value}">${s.label}</option>`);
+                }
+				$("#node-input-compatibility-l").append(selectOpt);
+			});
+		},
+		oneditsave: function () {
+			var node = this;
+			let compat = $("#node-input-compatibility-l")
+				.val()
+				.map((m) => {
+					switch (m) {
+						case "windows": {
+							return { label: "Windows", value: "windows"};
+						}
+						case "macos": {
+							return { label: "MacOS", value: "macos" };
+						}
+						case "linux": {
+							return { label: "Linux", value: "linux" };
+						}
+						case "cloud": {
+							return { label: "Maya Cloud", value: "cloud" };
+						}
+					}
+				});
+			node.compatibility = compat;
+		},
+	});
+</script>
+<script type="text/html" data-template-name="bot-info">
+	<div class="form-row">
+		<label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+		<input
+			type="text"
+			id="node-input-name"
+			style="width:70%;"
+			placeholder="Name"
+		/>
+	</div>
+	<div class="form-row">
+		<label for="node-input-description"
+			><i class="fa fa-tag"></i> Description</label
+		>
+		<input
+			type="text"
+			id="node-input-description"
+			style="width:70%;"
+			placeholder="A short description of the automation collection"
+		/>
+	</div>
+	<div class="form-row" id="compatibility"></div>
+	<div class="form-row">
+		<label for="node-input-developer"
+			><i class="fa fa-tag"></i> Developer</label
+		>
+		<input
+			type="text"
+			id="node-input-developer"
+			style="width:70%;"
+			placeholder="Developer Identity"
+		/>
+	</div>
+</script>
