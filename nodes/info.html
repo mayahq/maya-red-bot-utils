@@ -13,7 +13,7 @@
 					day: "numeric",
 				})
 			},
-			timestamp: {value: new Date().getTime()},
+			timestamp: { value: new Date().getTime() },
 			compatibility: { value: [] },
 			developer: { value: "" },
 		},
@@ -97,9 +97,9 @@
 		},
 		oneditsave: function () {
 			var node = this;
-			let compat2 = $("#node-input-compatibility-l")
-				.val()
-				.split(",")
+			let compatilibilityVal = $("#node-input-compatibility-l").val()
+			if(compatilibilityVal){
+				node.compatibility = compatilibilityVal.split(",")
 				.map((m) => {
 					switch (m) {
 						case "windows": {
@@ -116,7 +116,9 @@
 						}
 					}
 				});
-			node.compatibility = compat2;
+			} else {
+				node.compatibility = []
+			}
 
 			$("#node-input-description").val(this.editor.getValue());
 			this.editor.destroy();
