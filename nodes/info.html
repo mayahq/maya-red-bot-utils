@@ -4,15 +4,25 @@
 		color: "#d8bfd8",
 		defaults: {
 			name: { value: "" },
+			title: { value: "" },
 			description: { value: "" },
-			created: { value: new Date().toLocaleString('en', { year: 'numeric', month: 'long', day: 'numeric' }) },
+			created: {
+				value: new Date().toLocaleString("en", {
+					year: "numeric",
+					month: "long",
+					day: "numeric",
+				}),
+			},
 			compatibility: { value: [] },
 			developer: { value: "" },
+			fruit: { value: [] },
 		},
 		inputs: 0,
 		outputs: 0,
 		icon: "comment.svg",
-		label: "bot-info",
+		label: function () {
+			return this.name || "bot-info";
+		},
 		labelStyle: function () {
 			return this.name ? "node_label_italic" : "";
 		},
@@ -42,30 +52,58 @@
 
 			let selected = this.compatibility || [];
 
-			let div = $.find("#compatibility")[0];
+			let selectionString = "";
+			selected.forEach((s) => {
+				selectionString = selectionString + s.value + ",";
+			});
+			selectionString = selectionString.replace(/(^[,\s]+)|([,\s]+$)/g, "");
 
-            let label = $(`<label for="node-input-compatibility-l"><i class="fa fa-tag"></i> Compatibility</label>`).appendTo(div);
-            let select = $(`<select type="text" id="node-input-compatibility-l" multiple></select>`).appendTo(div);
+			let div2 = $.find("#compatibility")[0];
+			let label2 = $(
+				`<label for="node-input-compatibility-l"><i class="fa fa-tag"></i> Platforms</label>`
+			).appendTo(div2);
+			let input = $(`<input 
+												type="text" 
+												id="node-input-compatibility-l" 
+												value=${selectionString}
+												style="margin-left:3px; width:calc(70.5%);"></input>`).appendTo(div2);
 
-			selectionList.forEach((s) => {
-                let selectOpt;
-                let x = selected.find((f) => f.value === s.value);
-                if(x){
-                    selectOpt = $(`<option value="${s.value}" selected>${s.label}</option>`);
-                } else {
-                    selectOpt = $(`<option value="${s.value}">${s.label}</option>`);
-                }
-				$("#node-input-compatibility-l").append(selectOpt);
+			$("#node-input-compatibility-l")
+				.typedInput({
+					type: "compatibility-l",
+					types: [
+						{
+							value: "selected",
+							label: "Select platforms",
+							title: "Select platforms",
+							multiple: true,
+							showLabel: true,
+							options: [
+								{ value: "macos", label: "MacOS", multiple: true },
+								{ value: "windows", label: "Windows", multiple: true },
+								{ value: "linux", label: "Linux", multiple: true },
+								{ value: "cloud", label: "Maya Cloud", multiple: true },
+							],
+						},
+					],
+				})
+				.appendTo(div2);
+
+			this.editor = RED.editor.createEditor({
+				id: "node-input-info-editor",
+				mode: "ace/mode/markdown",
+				value: $("#node-input-description").val(),
 			});
 		},
 		oneditsave: function () {
 			var node = this;
-			let compat = $("#node-input-compatibility-l")
+			let compat2 = $("#node-input-compatibility-l")
 				.val()
+				.split(",")
 				.map((m) => {
 					switch (m) {
 						case "windows": {
-							return { label: "Windows", value: "windows"};
+							return { label: "Windows", value: "windows" };
 						}
 						case "macos": {
 							return { label: "MacOS", value: "macos" };
@@ -78,7 +116,28 @@
 						}
 					}
 				});
-			node.compatibility = compat;
+			node.compatibility = compat2;
+
+			$("#node-input-info").val(this.editor.getValue());
+			this.editor.destroy();
+			delete this.editor;
+		},
+		oneditcancel: function () {
+			this.editor.destroy();
+			delete this.editor;
+		},
+		oneditresize: function (size) {
+			var rows = $("#dialog-form>div:not(.node-text-editor-row)");
+			var height = $("#dialog-form").height();
+			for (var i = 0; i < rows.length; i++) {
+				height -= $(rows[i]).outerHeight(true);
+			}
+			var editorRow = $("#dialog-form>div.node-text-editor-row");
+			height -=
+				parseInt(editorRow.css("marginTop")) +
+				parseInt(editorRow.css("marginBottom"));
+			$(".node-text-editor").css("height", height + "px");
+			this.editor.resize();
 		},
 	});
 </script>
@@ -89,29 +148,34 @@
 			type="text"
 			id="node-input-name"
 			style="width:70%;"
-			placeholder="Name"
+			placeholder="Node name"
 		/>
 	</div>
 	<div class="form-row">
+		<label for="node-input-title"><i class="fa fa-tag"></i> Title</label>
+		<input
+			type="text"
+			id="node-input-title"
+			style="width:70%;"
+			placeholder="Name of Maya automation collection"
+		/>
+	</div>
+	<div class="form-row node-text-editor-row">
 		<label for="node-input-description"
 			><i class="fa fa-tag"></i> Description</label
 		>
-		<input
-			type="text"
-			id="node-input-description"
-			style="width:70%;"
-			placeholder="A short description of the automation collection"
-		/>
+		<input type="hidden" id="node-input-description" autofocus="autofocus">
+		<div style="height: 60px; min-height:60px;" class="node-text-editor" id="node-input-info-editor"></div>
 	</div>
 	<div class="form-row" id="compatibility"></div>
 	<div class="form-row">
-		<label for="node-input-developer"
-			><i class="fa fa-tag"></i> Developer</label
+		<label for="node-input-developer" style="width:30%"
+			><i class="fa fa-tag"></i> Developer Contact</label
 		>
 		<input
 			type="text"
 			id="node-input-developer"
-			style="width:70%;"
+			style="width:62%;"
 			placeholder="Developer Identity"
 		/>
 	</div>
