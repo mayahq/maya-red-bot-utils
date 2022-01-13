@@ -1576,7 +1576,7 @@ copies or substantial portions of the Software.
                     //generate a toggle for autostart
                     //var autostart = option.autostart ? false : option.autostart;
                     autostartField = $('<input/>', {class: "node-input-option-autostart", title: "Check this option to start schedule on deploying. Uncheck to be able to dynamically control the node schedule from dashboard", type: "checkbox" , style: "margin-left:10px; margin-bottom:7px; width:calc(3% - 3px);", checked: option.autostart, value: "true"}).appendTo(row2)
-                    row2.append('<label style="width: 12%; font-size:120%; margin-left:5px" title="Check this option to start schedule on deploying. Uncheck to be able to dynamically control the node schedule from dashboard">Autostart</label>')
+                    row2.append('<label style="width: 12%; font-size:1rem; margin-left:5px" title="Check this option to start schedule on deploying. Uncheck to be able to dynamically control the node schedule from dashboard">Autostart</label>')
                     
                     //setup the expression combo
                     expressionField.combobox({
@@ -1770,38 +1770,51 @@ copies or substantial portions of the Software.
                 });
 
                 var tmp = this.options;
-
-                $.ajax({
-                    url: this.endpointUrl+"/staticOptions",
-                    type: "GET",
-                    content: 'json',
-                    // eslint-disable-next-line no-unused-vars
-                    success: function (response) {
-                        if(response.length) {
-                            tmp = response
-                        }
-                        for (var i = 0; i < tmp.length; i++) {
-                            var option = tmp[i];
-                            try {
-                                if(option.topic && option.expression)  generateOption(i, option);
-                            } catch (error) {
-                                console.warn("generateOption caused an error: ", option, error);
+                console.log("🚀 ~ file: scheduler.html ~ line 1773 ~ tmp", tmp)
+                if (!tmp.length || tmp[0].expression) {
+                    console.log("successive")
+                    $.ajax({
+                        url: this.endpointUrl+"/staticOptions",
+                        type: "GET",
+                        content: 'json',
+                        // eslint-disable-next-line no-unused-vars
+                        success: function (response) {
+                            if(response.length) {
+                                tmp = response
+                            }
+                            for (var i = 0; i < tmp.length; i++) {
+                                var option = tmp[i];
+                                try {
+                                    if(option.topic && option.expression)  generateOption(i, option);
+                                } catch (error) {
+                                    console.warn("generateOption caused an error: ", option, error);
+                                }
+                            }
+                        },
+                        error: function(err) {
+                            console.log(err);
+                            for (var i = 0; i < tmp.length; i++) {
+                                var option = tmp[i];
+                                try {
+                                    if(option.topic && option.expression)  generateOption(i, option);
+                                } catch (error) {
+                                    console.warn("generateOption caused an error: ", option, error);
+                                }
                             }
                         }
-                    },
-                    error: function(err) {
-                        console.log(error);
+                    });
+                } else {
+                    console.log("first");
+                    for (var i = 0; i < this.options.length; i++) {
+                        var option = this.options[i];
+                        try {
+                            if(option.topic && option.expression)  generateOption(i, option);
+                        } catch (error) {
+                            console.warn("generateOption caused an error: ", option, error);
+                        }
                     }
-                });
+                }
 
-                //for (var i = 0; i < this.options.length; i++) {
-                //    var option = this.options[i];
-                //    try {
-                //        if(option.topic && option.expression)  generateOption(i, option);
-                //    } catch (error) {
-                //        console.warn("generateOption caused an error: ", option, error);
-                //    }
-                //}
     
                 $( "#node-input-option-container" ).sortable({
                     axis: "y",
