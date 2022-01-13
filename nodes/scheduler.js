@@ -1803,6 +1803,8 @@ module.exports = function (RED) {
 							isDynamic: task.isDynamic,
 							isStatic: task.isStatic,
 							autostart: task.autostart,
+							expression: task.node_expressionType === 'cron' || task.node_expressionType === ''? task.node_expression: null,
+							expressionType: task.node_expressionType,
 							...taskStatus
 						};
 					})
