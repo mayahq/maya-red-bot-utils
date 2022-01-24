@@ -885,6 +885,7 @@ copies or substantial portions of the Software.
                 endpointUrl: { value: "" },
                 timeZone: { value: "" },
                 persistTasks: { value: true },
+                wasDeployed: { value: true },
                 commandResponseMsgOutput: { value: "output1" },
                 outputs: { value: 1 },
                 options: {
@@ -1769,51 +1770,39 @@ copies or substantial portions of the Software.
                     $( "#bot-scheduler-dynamic-nodes-dialog" ).dialog( "open" );
                 });
 
+
                 var tmp = this.options;
-                console.log("🚀 ~ file: scheduler.html ~ line 1773 ~ tmp", tmp)
-                if (!tmp.length || tmp[0].expression) {
-                    console.log("successive")
-                    $.ajax({
-                        url: this.endpointUrl+"/staticOptions",
-                        type: "GET",
-                        content: 'json',
-                        // eslint-disable-next-line no-unused-vars
-                        success: function (response) {
-                            if(response.length) {
-                                tmp = response
-                            }
-                            for (var i = 0; i < tmp.length; i++) {
-                                var option = tmp[i];
-                                try {
-                                    if(option.topic && option.expression)  generateOption(i, option);
-                                } catch (error) {
-                                    console.warn("generateOption caused an error: ", option, error);
-                                }
-                            }
-                        },
-                        error: function(err) {
-                            console.log(err);
-                            for (var i = 0; i < tmp.length; i++) {
-                                var option = tmp[i];
-                                try {
-                                    if(option.topic && option.expression)  generateOption(i, option);
-                                } catch (error) {
-                                    console.warn("generateOption caused an error: ", option, error);
-                                }
+               
+                $.ajax({
+                    url: this.endpointUrl+"/staticOptions",
+                    type: "GET",
+                    content: 'json',
+                    // eslint-disable-next-line no-unused-vars
+                    success: function (response) {
+                        if(response.length) {
+                            tmp = response
+                        }
+                        for (var i = 0; i < tmp.length; i++) {
+                            var option = tmp[i];
+                            try {
+                                if(option.topic && option.expression)  generateOption(i, option);
+                            } catch (error) {
+                                console.warn("generateOption caused an error: ", option, error);
                             }
                         }
-                    });
-                } else {
-                    console.log("first");
-                    for (var i = 0; i < this.options.length; i++) {
-                        var option = this.options[i];
-                        try {
-                            if(option.topic && option.expression)  generateOption(i, option);
-                        } catch (error) {
-                            console.warn("generateOption caused an error: ", option, error);
+                    },
+                    error: function(err) {
+                        console.log(err);
+                        for (var i = 0; i < tmp.length; i++) {
+                            var option = tmp[i];
+                            try {
+                                if(option.topic && option.expression)  generateOption(i, option);
+                            } catch (error) {
+                                console.warn("generateOption caused an error: ", option, error);
+                            }
                         }
                     }
-                }
+                });
 
     
                 $( "#node-input-option-container" ).sortable({
@@ -1843,7 +1832,8 @@ copies or substantial portions of the Software.
                         offset: option.find(".node-input-option-offset").val(),
                         solarType: option.find(".node-input-option-solarEvents").typedInput("type") || "all",
                         solarEvents: option.find(".node-input-option-solarEvents").typedInput("value"),
-                        autostart: option.find(".node-input-option-autostart").prop('checked') ? true : false
+                        autostart: option.find(".node-input-option-autostart").prop('checked') ? true : false,
+                        isStatic: true
                     };
                     if (option.find(".node-input-option-value").typedInput('type') === "num") {
                         o.payload = Number(o.value);
