@@ -16,6 +16,7 @@
 			timestamp: { value: new Date().getTime() },
 			compatibility: { value: [] },
 			developer: { value: "" },
+			previewMedia: {value: "Comma separated list of links to preview media"}
 		},
 		inputs: 0,
 		outputs: 0,
@@ -89,10 +90,16 @@
 				})
 				.appendTo(div2);
 
-			this.editor = RED.editor.createEditor({
-				id: "node-input-info-editor",
+			this.editor1 = RED.editor.createEditor({
+				id: "node-input-info-editor-1",
 				mode: "ace/mode/markdown",
 				value: $("#node-input-description").val(),
+			});
+
+			this.editor2 = RED.editor.createEditor({
+				id: "node-input-info-editor-2",
+				mode: "ace/mode/markdown",
+				value: $("#node-input-previewMedia").val(),
 			});
 		},
 		oneditsave: function () {
@@ -120,9 +127,13 @@
 				node.compatibility = []
 			}
 
-			$("#node-input-description").val(this.editor.getValue());
-			this.editor.destroy();
-			delete this.editor;
+			$("#node-input-description").val(this.editor1.getValue());
+			this.editor1.destroy();
+			delete this.editor1;
+
+			$("#node-input-previewMedia").val(this.editor2.getValue());
+			this.editor2.destroy();
+			delete this.editor2;
 		},
 		oneditcancel: function () {
 			this.editor.destroy();
@@ -167,7 +178,7 @@
 			><i class="fa fa-tag"></i> Description</label
 		>
 		<input type="hidden" id="node-input-description" autofocus="autofocus">
-		<div style="height: 60px; min-height:60px;" class="node-text-editor" id="node-input-info-editor"></div>
+		<div style="height: 60px; min-height:60px;" class="node-text-editor" id="node-input-info-editor-1"></div>
 	</div>
 	<div class="form-row" id="compatibility"></div>
 	<div class="form-row">
@@ -180,5 +191,12 @@
 			style="width:62%;"
 			placeholder="Developer Identity"
 		/>
+	</div>
+	<div class="form-row node-text-editor-row">
+		<label for="node-input-previewMedia"
+			><i class="fa fa-tag"></i> Preview Media</label
+		>
+		<input type="hidden" id="node-input-previewMedia" autofocus="autofocus">
+		<div style="height: 60px; min-height:60px;" class="node-text-editor" id="node-input-info-editor-2"></div>
 	</div>
 </script>
