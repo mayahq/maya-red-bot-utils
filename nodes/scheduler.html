@@ -1093,7 +1093,7 @@ copies or substantial portions of the Software.
                     $spinner.show();
                     $table.empty();
                     $.ajax({
-                        url: "botscheduler/" + nodeId + "/getDynamic",
+                        url: RED.settings.apiRootUrl+"/botscheduler/" + nodeId + "/getDynamic",
                         // url: 'botscheduler/tz',
                         type: 'POST',
                         datatype: 'json'
@@ -1208,7 +1208,7 @@ copies or substantial portions of the Software.
     
                 var tzData;
                 $.ajax({
-                    url: "botscheduler/0/tz",
+                    url: RED.settings.apiRootUrl+"/botscheduler/0/tz",
                     type: 'POST',
                     datatype: 'json'
                 })
@@ -1458,7 +1458,7 @@ copies or substantial portions of the Software.
                                     }
     
                                     $.ajax({
-                                        url: "botscheduler/0/expressionTip",
+                                        url: RED.settings.apiRootUrl+"/botscheduler/0/expressionTip",
                                         type: 'POST',
                                         data: e,
                                         datatype: 'json'
@@ -1774,7 +1774,7 @@ copies or substantial portions of the Software.
                 var tmp = this.options;
                
                 $.ajax({
-                    url: this.endpointUrl+"/staticOptions",
+                    url: RED.settings.apiRootUrl+"/"+this.endpointUrl+"/staticOptions",
                     type: "GET",
                     content: 'json',
                     // eslint-disable-next-line no-unused-vars
@@ -1874,7 +1874,7 @@ copies or substantial portions of the Software.
                     }
                     label = label.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
                     $.ajax({
-                        url: "botschedulerinject/" + node.id,
+                        url: RED.settings.apiRootUrl+"/botschedulerinject/" + node.id,
                         type: "POST",
                         // eslint-disable-next-line no-unused-vars
                         success: function (response) {
