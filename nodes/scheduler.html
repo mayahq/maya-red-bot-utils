@@ -1774,7 +1774,7 @@ copies or substantial portions of the Software.
                 var tmp = this.options;
                
                 $.ajax({
-                    url: RED.settings.apiRootUrl+this.endpointUrl+"/staticOptions",
+                    url: RED.settings.apiRootUrl+this.endpointUrl.substring(1)+"/staticOptions",
                     type: "GET",
                     content: 'json',
                     // eslint-disable-next-line no-unused-vars
