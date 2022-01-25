@@ -1156,7 +1156,7 @@ module.exports = function (RED) {
 				let indicator = t.isDynamic ? "ring" : "dot";
 				let nx = t._expression || t._sequence;
 				node.nextDate = nx.nextDate(now);
-				node.nextEvent = t.name;
+				node.nextEvent = t.topic;
 				node.nextIndicator = indicator;
 				if (t.node_solarEventTimes && t.node_solarEventTimes.nextEvent) {
 					node.nextEvent = t.node_solarEventTimes.nextEvent;
@@ -1909,12 +1909,14 @@ module.exports = function (RED) {
 			return res.status(200).send(node.options);
 		}
 		
+		
 		const getcallback = (req, res) => {
 			let allTasks = flowContext.get(`${node.id}-tasks`).map(task => {
 				let taskStatus = getTaskStatus(node, task)
 				return {
+					node_name: node.name,
 					name: task.name,
-					topic: task.topic,
+					topic: task.node_topic,
 					node: node.id,
 					isDynamic: task.isDynamic,
 					isStatic: task.isStatic,
@@ -1925,6 +1927,28 @@ module.exports = function (RED) {
 				};
 			})
 			res.status(200).send(allTasks)
+		}
+
+		const getTaskCallback = (req, res) => {
+			let taskId = req.params.taskId;
+			let task = flowContext.get(`${node.id}-tasks`).find((m) => m.name = taskId);
+			if(task){
+				let taskStatus = getTaskStatus(node, task);
+				res.status(200).send({
+					node_name: node.name,
+					name: task.name,
+					topic: task.node_topic,
+					node: node.id,
+					isDynamic: task.isDynamic,
+					isStatic: task.isStatic,
+					autostart: task.autostart,
+					expression: task.node_expressionType === 'cron' || task.node_expressionType === ''? task.node_expression: null,
+					expressionType: task.node_expressionType,
+					...taskStatus
+				}); 
+			} else {
+				res.status(404).send({});
+			}
 		}
 
 		var maxApiRequestSize = RED.settings.apiMaxLength || "5mb";
@@ -1961,6 +1985,16 @@ module.exports = function (RED) {
 			urlencParser,
 			rawBodyParser,
 			getStaticOptions,
+			errorHandler
+		);
+
+		RED.httpNode.get(
+			node.endpointUrl+"/:taskId",
+			corsHandler,
+			jsonParser,
+			urlencParser,
+			rawBodyParser,
+			getTaskCallback,
 			errorHandler
 		);
 
@@ -2396,7 +2430,7 @@ module.exports = function (RED) {
 
 	RED.httpAdmin.post(
 		"/botschedulerinject/:id",
-		RED.auth.needsPermission("botscheduler.write"),
+		// RED.auth.needsPermission("botscheduler.write"),
 		function (req, res) {
 			var node = RED.nodes.getNode(req.params.id);
 			if (node != null) {
@@ -2415,7 +2449,7 @@ module.exports = function (RED) {
 
 	RED.httpAdmin.post(
 		"/botscheduler/:id/:operation",
-		RED.auth.needsPermission("botscheduler.read"),
+		// RED.auth.needsPermission("botscheduler.read"),
 		function (req, res) {
 			// console.log("/botscheduler", req.body);
 			try {

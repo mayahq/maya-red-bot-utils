@@ -49,21 +49,21 @@ copies or substantial portions of the Software.
         */
     
         var cronInputs = {
-            period: '<div class="cron-select-period"><label></label><select class="cron-period-select"></select></div>',
-            startTime: '<div class="cron-input cron-start-time">Start time <select class="cron-clock-hour"></select>:<select class="cron-clock-minute"></select></div>',
+            period: '<div class="cron-select-period"><label></label><select class="cron-period-select" style="background-color:#474747;"></select></div>',
+            startTime: '<div class="cron-input cron-start-time">Start time <select class="cron-clock-hour" style="background-color:#474747;"></select> : <select class="cron-clock-minute" style="background-color:#474747;"></select></div>',
             container: '<div class="cron-input"></div>',
             minutes: {
                 tag: 'cron-minutes',
-                inputs: [ '<p>Every <select class="cron-minutes-select"></select> minutes(s)</p>' ]
+                inputs: [ '<p>Every <select class="cron-minutes-select" style="background-color:#474747;"></select> minutes(s)</p>' ]
             },
             hourly: {
                 tag: 'cron-hourly',
-                inputs: [ '<p><input type="radio" name="hourlyType" value="every"> Every <select class="cron-hourly-select"></select> hour(s)</p>',
-                    '<p><input type="radio" name="hourlyType" value="clock"> Every day at <select class="cron-hourly-hour"></select>:<select class="cron-hourly-minute"></select></p>' ]
+                inputs: [ '<p><input type="radio" name="hourlyType" value="every"> Every <select class="cron-hourly-select" style="background-color:#474747;"></select> hour(s)</p>',
+                    '<p><input type="radio" name="hourlyType" value="clock"> Every day at <select class="cron-hourly-hour" style="background-color:#474747;"></select>:<select class="cron-hourly-minute" style="background-color:#474747;"></select></p>' ]
             },
             daily: {
                 tag: 'cron-daily',
-                inputs: [ '<p><input type="radio" name="dailyType" value="every"> Every <select class="cron-daily-select"></select> day(s)</p>',
+                inputs: [ '<p><input type="radio" name="dailyType" value="every"> Every <select class="cron-daily-select" style="background-color:#474747;"></select> day(s)</p>',
                     '<p><input type="radio" name="dailyType" value="clock"> Every week day</p>' ]
             },
             weekly: {
@@ -75,15 +75,15 @@ copies or substantial portions of the Software.
             },
             monthly: {
                 tag: 'cron-monthly',
-                inputs: [ '<p><input type="radio" name="monthlyType" value="byDay"> Day <select class="cron-monthly-day"></select> of every <select class="cron-monthly-month"></select> month(s)</p>',
-                    '<p><input type="radio" name="monthlyType" value="byWeek"> The <select class="cron-monthly-nth-day"></select> ' + 
-                    '<select class="cron-monthly-day-of-week"></select> of every <select class="cron-monthly-month-by-week"></select> month(s)</p>']
+                inputs: [ '<p><input type="radio" name="monthlyType" value="byDay"> Day <select class="cron-monthly-day" style="background-color:#474747;"></select> of every <select class="cron-monthly-month" style="background-color:#474747;"></select> month(s)</p>',
+                    '<p><input type="radio" name="monthlyType" value="byWeek"> The <select class="cron-monthly-nth-day" style="background-color:#474747;"></select> ' + 
+                    '<select class="cron-monthly-day-of-week" style="background-color:#474747;"></select> of every <select class="cron-monthly-month-by-week" style="background-color:#474747;"></select> month(s)</p>']
             },
             yearly: {
                 tag: 'cron-yearly',
-                inputs: [ '<p><input type="radio" name="yearlyType" value="byDay"> Every <select class="cron-yearly-month"></select> <select class="cron-yearly-day"></select></p>',
-                    '<p><input type="radio" name="yearlyType" value="byWeek"> The <select class="cron-yearly-nth-day"></select> ' + 
-                    '<select class="cron-yearly-day-of-week"></select> of <select class="cron-yearly-month-by-week"></select></p>']
+                inputs: [ '<p><input type="radio" name="yearlyType" value="byDay"> Every <select class="cron-yearly-month" style="background-color:#474747;"></select> <select class="cron-yearly-day" style="background-color:#474747;"></select></p>',
+                    '<p><input type="radio" name="yearlyType" value="byWeek"> The <select class="cron-yearly-nth-day" style="background-color:#474747;"></select> ' + 
+                    '<select class="cron-yearly-day-of-week" style="background-color:#474747;"></select> of <select class="cron-yearly-month-by-week" style="background-color:#474747;"></select></p>']
             }
         };
     
@@ -1093,7 +1093,7 @@ copies or substantial portions of the Software.
                     $spinner.show();
                     $table.empty();
                     $.ajax({
-                        url: RED.settings.apiRootUrl+"/botscheduler/" + nodeId + "/getDynamic",
+                        url: RED.settings.apiRootUrl+"botscheduler/" + nodeId + "/getDynamic",
                         // url: 'botscheduler/tz',
                         type: 'POST',
                         datatype: 'json'
@@ -1208,7 +1208,7 @@ copies or substantial portions of the Software.
     
                 var tzData;
                 $.ajax({
-                    url: RED.settings.apiRootUrl+"/botscheduler/0/tz",
+                    url: RED.settings.apiRootUrl+"botscheduler/0/tz",
                     type: 'POST',
                     datatype: 'json'
                 })
@@ -1348,8 +1348,8 @@ copies or substantial portions of the Software.
                             }
                         }   
                     }
-                    option.name = option.name || "schedule" + (optionIndex + 1);
-                    option.topic = option.topic || "topic" + (optionIndex + 1);
+                    option.name = node.id +"#" + (optionIndex + 1);
+                    option.topic = option.topic || `${node.name || 'bot-scheduler'}-#` + (optionIndex + 1);
                     option.payloadType = option.payloadType || option.type || "default";
                     option.autostart = option.autostart ? true : false
                     delete option.type;                
@@ -1458,7 +1458,7 @@ copies or substantial portions of the Software.
                                     }
     
                                     $.ajax({
-                                        url: RED.settings.apiRootUrl+"/botscheduler/0/expressionTip",
+                                        url: RED.settings.apiRootUrl+"botscheduler/0/expressionTip",
                                         type: 'POST',
                                         data: e,
                                         datatype: 'json'
@@ -1523,12 +1523,12 @@ copies or substantial portions of the Software.
     
                     //generate the name field                              
                     var nameClass = "node-input-option-name" + ((!option.name || dupCheck[option.name]) ? " input-error" : "");
-                    nameField = $('<input/>', { class: nameClass, type: "text", style: "margin-left:0px; width:calc(28% - 16px);", placeholder: 'name', title: "name", value: option.name }).appendTo(div);
+                    nameField = $('<label/>', { class: nameClass, type: "text", style: "display:none", placeholder: '', title: "name", value: option.name, disabled: true }).appendTo(div);
                     dupCheck[option.name] = true;
     
                     //generate the topic field
                     var topicClass = "node-input-option-topic" + ((!option.topic) ? " input-error" : "");
-                    topicField = $('<input/>', { class: topicClass, type: "text", style: "margin-left:5px; width:calc(32% - 16px);", placeholder: 'topic', title: "topic", value: option.topic }).appendTo(div);
+                    topicField = $('<input/>', { class: topicClass, type: "text", style: "margin-left:5px; width:calc(32% - 16px);", placeholder: 'schedule name', title: "topic", value: option.topic }).appendTo(div);
                     
                     //generate the payload field
                     payloadField = $('<input/>', { class: "node-input-option-payload", type: "text", style: "margin-left:5px; width:calc(40% - 25px);", placeholder: 'payload', value: option.payload || "" }).appendTo(div);
@@ -1774,7 +1774,7 @@ copies or substantial portions of the Software.
                 var tmp = this.options;
                
                 $.ajax({
-                    url: RED.settings.apiRootUrl+"/"+this.endpointUrl+"/staticOptions",
+                    url: RED.settings.apiRootUrl+this.endpointUrl+"/staticOptions",
                     type: "GET",
                     content: 'json',
                     // eslint-disable-next-line no-unused-vars
@@ -1874,7 +1874,7 @@ copies or substantial portions of the Software.
                     }
                     label = label.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
                     $.ajax({
-                        url: RED.settings.apiRootUrl+"/botschedulerinject/" + node.id,
+                        url: RED.settings.apiRootUrl+"botschedulerinject/" + node.id,
                         type: "POST",
                         // eslint-disable-next-line no-unused-vars
                         success: function (response) {
@@ -2128,7 +2128,7 @@ copies or substantial portions of the Software.
         </div>         
         <div class="form-row bot-scheduler-form-row">
             <label for="node-input-timeZone"><i class="fa fa-globe"></i> Timezone</label>
-            <input type="text" id="node-input-timeZone" placeholder="Leave empty for none/system">
+            <input type="text" id="node-input-timeZone" placeholder="format: Asia/Kolkata OR leave blank for system's timezone">
         </div>  
         <div class="form-row bot-scheduler-form-row">
             <label for="node-input-commandResponseMsgOutput"><i class="fa fa-dot-circle-o"></i> Outputs</label>
@@ -2147,15 +2147,17 @@ copies or substantial portions of the Software.
         </div> 
         <div class="form-row bot-scheduler-form-row">
             <a href="#" class="editor-button editor-button-small" id="node-input-add-option" style="margin-top: 4px;"><i class="fa fa-plus"></i> <span>add</span></a>
-            <a href="#" class="editor-button editor-button-small" id="node-input-show-dynamic" style="margin-top: 4px;"><i class="fa fa-table"></i> <span>view dynamic schedules</span></a>
+            <!-- <a href="#" class="editor-button editor-button-small" id="node-input-show-dynamic" style="margin-top: 4px;"><i class="fa fa-table"></i> <span>view dynamic schedules</span></a> -->
         </div>
     </div>
     
     </script>
     
     <script type="text/html" data-help-name="bot-scheduler">
-        <p>Schedule the injection of a payload to start a flow</p>
-        <h3>Properties...</h3>
+
+        <h2 data-type="description-title">Description</h2>
+        <p data-type="description-summary">Schedule repeatable tasks by setting up cron jobs and control from Maya task dashboard</p>
+        <h3>Properties</h3>
         <dl class="message-properties">
             <h4>Output property</h4>
             <div style="padding-left: 15px">
