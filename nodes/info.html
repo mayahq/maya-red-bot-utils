@@ -16,7 +16,8 @@
 			timestamp: { value: new Date().getTime() },
 			compatibility: { value: [] },
 			developer: { value: "" },
-			previewMedia: {value: "Comma separated list of links to preview media"}
+			previewMedia: {value: ""},
+			version: {value: ""}
 		},
 		inputs: 0,
 		outputs: 0,
@@ -61,7 +62,7 @@
 
 			let div2 = $.find("#compatibility")[0];
 			let label2 = $(
-				`<label for="node-input-compatibility-l"><i class="fa fa-tag"></i> Platforms</label>`
+				`<label for="node-input-compatibility-l"> Platforms</label>`
 			).appendTo(div2);
 			let input = $(`<input 
 												type="text" 
@@ -96,11 +97,11 @@
 				value: $("#node-input-description").val(),
 			});
 
-			this.editor2 = RED.editor.createEditor({
-				id: "node-input-info-editor-2",
-				mode: "ace/mode/markdown",
-				value: $("#node-input-previewMedia").val(),
-			});
+			//this.editor2 = RED.editor.createEditor({
+			//	id: "node-input-info-editor-2",
+			//	mode: "ace/mode/markdown",
+			//	value: $("#node-input-previewMedia").val(),
+			//});
 		},
 		oneditsave: function () {
 			var node = this;
@@ -131,9 +132,9 @@
 			this.editor1.destroy();
 			delete this.editor1;
 
-			$("#node-input-previewMedia").val(this.editor2.getValue());
-			this.editor2.destroy();
-			delete this.editor2;
+			//$("#node-input-previewMedia").val(this.editor2.getValue());
+			//this.editor2.destroy();
+			//delete this.editor2;
 		},
 		oneditcancel: function () {
 			this.editor.destroy();
@@ -156,7 +157,7 @@
 </script>
 <script type="text/html" data-template-name="bot-info">
 	<div class="form-row">
-		<label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+		<label for="node-input-name"> Name</label>
 		<input
 			type="text"
 			id="node-input-name"
@@ -165,7 +166,7 @@
 		/>
 	</div>
 	<div class="form-row">
-		<label for="node-input-title"><i class="fa fa-tag"></i> Title</label>
+		<label for="node-input-title"> Title</label>
 		<input
 			type="text"
 			id="node-input-title"
@@ -175,15 +176,24 @@
 	</div>
 	<div class="form-row node-text-editor-row">
 		<label for="node-input-description"
-			><i class="fa fa-tag"></i> Description</label
+			> Description</label
 		>
 		<input type="hidden" id="node-input-description" autofocus="autofocus">
 		<div style="height: 60px; min-height:60px;" class="node-text-editor" id="node-input-info-editor-1"></div>
 	</div>
+	<div class="form-row">
+		<label for="node-input-title"> Version</label>
+		<input
+			type="text"
+			id="node-input-version"
+			style="width:70%;"
+			placeholder="Version of the automation collection"
+		/>
+	</div>
 	<div class="form-row" id="compatibility"></div>
 	<div class="form-row">
 		<label for="node-input-developer" style="width:30%"
-			><i class="fa fa-tag"></i> Developer Contact</label
+			> Developer Contact</label
 		>
 		<input
 			type="text"
@@ -192,11 +202,63 @@
 			placeholder="Developer Identity"
 		/>
 	</div>
-	<div class="form-row node-text-editor-row">
+	<div class="form-row" id="previewMedia">
 		<label for="node-input-previewMedia"
-			><i class="fa fa-tag"></i> Preview Media</label
+			> Previews</label
 		>
-		<input type="hidden" id="node-input-previewMedia" autofocus="autofocus">
-		<div style="height: 60px; min-height:60px;" class="node-text-editor" id="node-input-info-editor-2"></div>
+		<input type="text" 
+						id="node-input-previewMedia" 
+						title="comma separate links of preview media"
+						style="width:70%;"
+						placeholder="https://example.org/example.png, https://s3.amazon.com/my-images/img1.png"
+					/>
 	</div>
+</script>
+
+<script type="text/html" data-help-name="bot-info">
+	<h2 data-type="description-title">Description</h2>
+  <p data-type="description-summary">This is a comment-type node and hence has no inputs or outputs. Details can be added here so that one export, they can be displayed on the Maya Quick Share page like <a href="https://mayahq.com/share?link=https://raw.githubusercontent.com/mayahq/automations/main/linkedinprofiles.json">this</a> .</p>
+	<h2>Config</h2>
+    <dl class="message-properties">
+					<dt>
+						<span class="property-name">Name</span>
+						<span class="property-type">string</span>
+				</dt>
+				<dd>ame of the information node as it appears on the flow</dd>
+        <dt>
+            <span class="property-name">Title</span>
+            <span class="property-type">string</span>
+        </dt>
+        <dd>Add a title to your workflow for easy identification.</dd>
+
+        <dt class="optional">
+            <span class="property-name">Description</span>
+            <span class="property-type">string</span>
+        </dt>
+        <dd>Full markdown editor to add description. This can be used to add details about the automation, installation details, how-tos, and other related information.</dd>
+
+				<dt>
+					<span class="property-name">Version</span>
+					<span class="property-type">string</span>
+				</dt>
+				<dd>Version information of the automation collection</dd>
+
+				<dt>
+					<span class="property-name">Platforms</span>
+					<span class="property-type">string</span>
+			</dt>
+			<dd>Multi-select to specify which platforms an automation will work on (if applicable)</dd>
+
+			<dt>
+				<span class="property-name">Developer</span>
+				<span class="property-type">string</span>
+			</dt>
+			<dd>Add a email address for anyone to contact for maintenance or queries.</dd>
+
+			<dt>
+				<span class="property-name">Previews</span>
+				<span class="property-type">string</span>
+			</dt>
+			<dd>Links to media files for screenshots, gifs, videos separated by commas</dd>
+    </dl>
 </script>
