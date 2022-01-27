@@ -505,7 +505,7 @@ function isCronLike(expression) {
 //  * @param {integer} optionIndex An index number to use for defaults
 //  * @param {object} option The option object to update
 //  */
-function applyOptionDefaults(option, optionIndex) {
+function applyOptionDefaults(option, optionIndex, nodeId) {
 	if (isObject(option) == false) {
 		return; //no point in continuing
 	}
@@ -528,8 +528,8 @@ function applyOptionDefaults(option, optionIndex) {
 			option.expressionType = "cron";
 		}
 	}
-	option.name = option.name || "schedule" + (optionIndex + 1);
-	option.topic = option.topic || option.name;
+	option.name = option.name || `${nodeId}${optionIndex + 1}`;
+	option.topic = option.topic || `bot-scheduler#${optionIndex + 1}`;
 	option.payloadType = option.payloadType || option.type || "default";
 	delete option.type;
 	if (option.expressionType == "cron" && !option.expression)
@@ -962,7 +962,7 @@ function exportTask(task, includeStatus) {
 	// added current running status to dynamic persistence
 	// to help filter stopped jobs from restarting on redeploy
 	var o = {
-		type: task.isDynamic ? 'dynamic' : 'static',
+		type: task.isDynamic ? "dynamic" : "static",
 		topic: task.node_topic || task.name,
 		name: task.name || task.node_topic,
 		payloadType: task.node_payloadType,
@@ -1085,7 +1085,11 @@ module.exports = function (RED) {
 		RED.httpNode.options("*", corsHandler);
 	}
 
-	const hashCode = s => s.split('').reduce((a,b)=>{a=((a<<5)-a)+b.charCodeAt(0);return a&a},0)
+	const hashCode = (s) =>
+		s.split("").reduce((a, b) => {
+			a = (a << 5) - a + b.charCodeAt(0);
+			return a & a;
+		}, 0);
 
 	function BotEvents(config) {
 		RED.nodes.createNode(this, config);
@@ -1099,16 +1103,20 @@ module.exports = function (RED) {
 		node.crontab = config.crontab;
 		node.outputField = config.outputField || "payload";
 		node.timeZone = config.timeZone;
-		node.persistTasks = true
-		node.tasks = []
-		let onFileOpts = getStaticTasksFromFile()?.schedules?.length ? getStaticTasksFromFile()?.schedules: [];
+		node.persistTasks = true;
+		node.tasks = [];
+		node.changedAt = config.changedAt;
+		let onFileOpts = getStaticTasksFromFile()?.schedules?.length
+			? getStaticTasksFromFile()?.schedules
+			: [];
 		let configOpts = config.options || [];
-		if(hashCode(JSON.stringify(onFileOpts)) === hashCode(JSON.stringify(configOpts))){
-			node.options = onFileOpts;
+		if(config.changedAt){
+			config.changedAt = new Date(config.changedAt);
+			node.options = getStaticPersistModTime() >= config.changedAt ? onFileOpts : configOpts;
 		} else {
-			node.options = configOpts
+			node.options = onFileOpts;
 		}
-		//node.options = config.options.length ? config.options : getStaticTasksFromFile()?.schedules?.length ? getStaticTasksFromFile()?.schedules : [];
+		
 		node.commandResponseMsgOutput =
 			config.commandResponseMsgOutput || "output1";
 		node.outputs = 1;
@@ -1340,7 +1348,7 @@ module.exports = function (RED) {
 		}
 		function refreshTasks(node) {
 			let tasks = node.tasks;
-			console.log("Refreshing running schedules")
+			console.log("Refreshing running schedules");
 			node.log("Refreshing running schedules");
 			if (tasks) {
 				try {
@@ -1359,7 +1367,7 @@ module.exports = function (RED) {
 						let task = node.tasks[index];
 						if (task.node_expressionType == "cron") {
 							task.stop();
-							if((task.isStatic && task.autostart)||task.isDynamic){
+							if ((task.isStatic && task.autostart) || task.isDynamic) {
 								task.start();
 							}
 						} else {
@@ -1509,10 +1517,9 @@ module.exports = function (RED) {
 				// eslint-disable-next-line no-empty
 			} catch (error) {}
 		}
-		function updateTask(node, options, msg, isRedeploy=false) {
-
+		function updateTask(node, options, msg, isRedeploy = false, static = true) {
 			node.wasDeployed = isRedeploy;
-						
+
 			if (!options || typeof options != "object") {
 				node.warn("schedule settings are not valid", msg);
 				return null;
@@ -1535,26 +1542,48 @@ module.exports = function (RED) {
 			for (let index = 0; index < options.length; index++) {
 				let opt = options[index];
 				let task = getTask(node, opt.name);
-				let isDynamic = !task || task.isDynamic;
-				// let isStatic = task && task.isStatic;
+				let isDynamic = !static;
+				let isStatic = static;
 				let opCount = 0,
-					modified = false;
+				modified = false;
+				let staticSchedulesList = getStaticTasksFromFile().schedules;
 				if (task) {
 					modified = true;
 					opCount = task.node_count || 0;
 					deleteTask(node, opt.name);
-				}
-				let taskCount = node.tasks ? node.tasks.length : 0;
-				let t = msg.isStatic ? createTask(node, opt, taskCount, true, false) : createTask(node, opt, taskCount, !isDynamic, false);
-				if (t) {
-					if (modified) t.node_modified = true;
-					t.node_count = opCount;
-					t.isDynamic = isDynamic;
+					let taskCount = node.tasks ? node.tasks.length : 0;
+					let ct = createTask(node, opt, taskCount, static, false);
+					if (ct) {
+						if (modified) ct.node_modified = true;
+						ct.node_count = opCount;
+						ct.isDynamic = isDynamic;
+						let t = staticSchedulesList.findIndex((stat) => stat.name === opt.name);
+						applyOptionDefaults(opt, t, node.id);
+						staticSchedulesList[t] = opt;
+						updateStaticTasksOnFile(staticSchedulesList);
+					}
+				} else {
+					let t = staticSchedulesList.find((stat) => stat.name === opt.name);
+					if(t){
+						staticSchedulesList.forEach((stat, i) => {
+							this[i] = opt;
+							applyOptionDefaults(this[i], i, node.id);
+              staticSchedulesList[i] = this[i];
+						});
+						updateStaticTasksOnFile(staticSchedulesList);
+					} else {
+						applyOptionDefaults(opt, staticSchedulesList.length - 1, node.id);
+						if(staticSchedulesList.length && !staticSchedulesList[0].expression) {
+							staticSchedulesList.pop();
+						} 
+						staticSchedulesList.push(opt);
+						updateStaticTasksOnFile(staticSchedulesList);
+					}
 				}
 			}
 		}
 
-		function createTask(node, opt, index, static = true, isRedeploy=true) {
+		function createTask(node, opt, index, static = true, isRedeploy = true) {
 			node.wasDeployed = isRedeploy;
 			opt = opt || {};
 			try {
@@ -1566,7 +1595,9 @@ module.exports = function (RED) {
 			} catch (error) {
 				node.error(error);
 			}
-			applyOptionDefaults(opt, index);
+			if (opt?.name) {
+				applyOptionDefaults(opt, index, node.id);
+			}
 			try {
 				validateOpt(opt);
 			} catch (error) {
@@ -1591,7 +1622,7 @@ module.exports = function (RED) {
 				let ds = parseDateSequence(opt.expression);
 				task = ds.task;
 			}
-			task.autostart = opt.autostart
+			task.autostart = opt.autostart;
 			task.isDynamic = !static;
 			task.isStatic = static;
 			task.name = "" + opt.name;
@@ -1635,7 +1666,7 @@ module.exports = function (RED) {
 					sendMsg(node, task, timestamp);
 					process.nextTick(function () {
 						if (task.node_expressionType === "solar") {
-							updateTask(node, task.node_opt, null);
+							updateTask(node, task.node_opt, null, static);
 						}
 					});
 				})
@@ -1654,31 +1685,50 @@ module.exports = function (RED) {
 					updateNextStatus(node);
 				});
 			let t = getTask(node, opt.name);
-			if(t) {
+			if (t) {
 				deleteTask(node, t.name);
 			}
-			if(static){
-				if(!opt.autostart){
+			if (static) {
+				if (!opt.autostart) {
 					let x = node.options.find((o) => o.name === task.name);
-					if(x) {opt.autostart = x.autostart}
+					if (x) {
+						opt.autostart = x.autostart;
+					}
 				}
-				if(opt.autostart){
+				if (opt.autostart) {
 					task.stop(); //prevent bug where calling start without first calling stop causes events to bunch up
 					task.start();
 				}
 				node.tasks.push(task);
-				flowContext.set(`${node.id}-tasks`, node.tasks)
+				flowContext.set(`${node.id}-tasks`, node.tasks);
 				return task;
 			} else {
 				task.stop(); //prevent bug where calling start without first calling stop causes events to bunch up
 				task.start();
 				node.tasks.push(task);
-				flowContext.set(`${node.id}-tasks`, node.tasks)
+				flowContext.set(`${node.id}-tasks`, node.tasks);
 				return task;
 			}
 		}
 
-		function getStaticTasksFromFile () {
+		function getStaticPersistModTime() {
+			let filePath = "";
+			try {
+				if (!persistAvailable || !node.persistTasks) {
+					return;
+				}
+				filePath = getStaticPersistFilePath();
+				if (fs.existsSync(filePath)) {
+					let stat = fs.statSync(filePath);
+					return stat.mtime;
+				}
+			} catch (err) {
+				console.error("Error reading file", err);
+				return;
+			}
+		}
+
+		function getStaticTasksFromFile() {
 			let filePath = "";
 			try {
 				if (!persistAvailable || !node.persistTasks) {
@@ -1689,18 +1739,18 @@ module.exports = function (RED) {
 					let fileData = fs.readFileSync(filePath);
 					let data = JSON.parse(fileData);
 					if (!data) {
-						console.log("no data in file")
+						console.log("no data in file");
 						return; //nothing to add
 					}
 					if (data.version != 1) {
-						throw new Error("Invalid version - cannot load dynamic schedules");
+						throw new Error("Invalid version - cannot load static schedules");
 					}
 					return data;
-				}	
+				}
 			} catch (err) {
 				console.error("Error reading file", err);
 				return;
-		}
+			}
 		}
 
 		function updateStaticTasksOnFile(options) {
@@ -1711,7 +1761,7 @@ module.exports = function (RED) {
 				}
 				filePath = getStaticPersistFilePath();
 				let staticTasks = node.tasks.filter((e) => e && e.isStatic);
-				let newOpts = staticTasks.map(t => t.node_opt);
+				let newOpts = staticTasks.map((t) => t.node_opt);
 				/*if(!dynNodesExp || !dynNodesExp.length){
                     //FUTURE TODO: Sanity check before deletion
                     //and only if someone asks for it :)
@@ -1741,7 +1791,7 @@ module.exports = function (RED) {
 				filePath = getPersistFilePath();
 				let dynNodes = node.tasks.filter((e) => e && e.isDynamic);
 				let staticTasks = node.tasks.filter((e) => e && e.isStatic);
-				let newOpts = staticTasks.map(t => t.node_opt);
+				let newOpts = staticTasks.map((t) => t.node_opt);
 				// node.options = node.options.map(t => {
 				// 	if(t.expressionType === 'cron'){
 				// 		let o = newOpts.find((o) => o.name === t.name)
@@ -1762,7 +1812,7 @@ module.exports = function (RED) {
 				let data = {
 					version: 1,
 					schedules: dynNodesExp,
-					staticSchedules: statTaskExp
+					staticSchedules: statTaskExp,
 				};
 				let fileData = JSON.stringify(data);
 				fs.writeFileSync(filePath, fileData);
@@ -1784,20 +1834,25 @@ module.exports = function (RED) {
 					let fileData = fs.readFileSync(filePath);
 					let data = JSON.parse(fileData) || node.options;
 					if (!data) {
-						console.log("no data in file")
+						console.log("no data in file");
 						return; //nothing to add
 					}
 					if (data.version != 1) {
 						throw new Error("Invalid version - cannot load dynamic schedules");
 					}
 					// console.log("!(" + `${data.schedules && data.schedules.length}` + " || "+ `${data.staticSchedules && data.staticSchedules.length}`+")")
-					if (!((data.schedules && data.schedules.length) || (data.staticSchedules && data.staticSchedules.length))) {
+					if (
+						!(
+							(data.schedules && data.schedules.length) ||
+							(data.staticSchedules && data.staticSchedules.length)
+						)
+					) {
 						return; //nothing to add
 					} else {
 						for (let iOpt = 0; iOpt < data.schedules.length; iOpt++) {
 							let opt = data.schedules[iOpt];
 							opt.name = opt.name || opt.topic;
-							if (opt.isRunning && opt.type === 'dynamic') {
+							if (opt.isRunning && opt.type === "dynamic") {
 								startTask(node, opt.name, isRedeploy);
 							} else {
 								createTask(node, opt, iOpt, false);
@@ -1806,11 +1861,11 @@ module.exports = function (RED) {
 						for (let iOpt = 0; iOpt < data.staticSchedules.length; iOpt++) {
 							let opt = data.staticSchedules[iOpt];
 							opt.name = opt.name || opt.topic;
-							if(opt.isRunning && opt.type === 'static'){
+							if (opt.isRunning && opt.type === "static") {
 								// createTask(node, opt, iOpt, true, isRedeploy);
 								startTask(node, opt.name, isRedeploy);
 							} else {
-								if(!getTask(node, opt.name)){
+								if (!getTask(node, opt.name)) {
 									createTask(node, opt, iOpt, true, isRedeploy);
 								}
 							}
@@ -1839,26 +1894,26 @@ module.exports = function (RED) {
 		}
 
 		// On redeploy the node logic starts here
-		reloadOnRedeploy()
+		reloadOnRedeploy();
 
-		async function reloadOnRedeploy () {
+		async function reloadOnRedeploy() {
 			node.wasDeployed = true;
 			try {
 				node.status({});
 				node.nextDate = null;
-	
+
 				if (!node.options) {
 					node.status({ fill: "grey", shape: "dot", text: "Nothing set" });
 					return;
 				}
-	
+
 				// node.tasks = [];
 				for (let iOpt = 0; iOpt < node.options.length; iOpt++) {
 					let opt = node.options[iOpt];
 					opt.name = opt.name || opt.topic;
 					node.statusUpdatePending = true; //prevent unnecessary status updates while loading
-					let t = await createTask(node, opt, iOpt, true, true)
-					
+					let t = await createTask(node, opt, iOpt, true, true);
+
 					// node.tasks.push(createTask(node, opt, iOpt, true, true));
 					// if(opt.reloadOnRedeploy){
 					// 	createTask(node, opt, iOpt, true);
@@ -1868,10 +1923,10 @@ module.exports = function (RED) {
 					// }
 				}
 				updateStaticTasksOnFile(node.options);
-	
+
 				//now load dynamic schedules from file
 				deserialise(true);
-	
+
 				setTimeout(() => {
 					updateNextStatus(node, true);
 				}, 1000);
@@ -1889,30 +1944,30 @@ module.exports = function (RED) {
 		}
 		// Endpoints for node apis accessible to dashboard
 		const errorHandler = function (err, req, res, next) {
-			node.warn(err);
-			res.sendStatus(500);
+			// node.warn(err);
+			res.status(500).send(err);
 		};
 		const postcallback = function (req, res) {
 			var msgid = RED.util.generateId();
 			res._msgid = msgid;
-			handleInput({payload: req.body});
+			handleInput({ payload: req.body, isStatic: true });
 			res.status(200).send({
 				message: "success",
 			});
 		};
 
-		function getStaticOptions (req, res) {
+		function getStaticOptions(req, res) {
 			let staticSchedules = getStaticTasksFromFile();
-			if(staticSchedules){
+			if (staticSchedules) {
 				return res.status(200).send(staticSchedules.schedules);
 			}
 			return res.status(200).send(node.options);
 		}
-		
-		
+
 		const getcallback = (req, res) => {
-			let allTasks = flowContext.get(`${node.id}-tasks`).map(task => {
-				let taskStatus = getTaskStatus(node, task)
+			// console.log(flowContext.get(`${node.id}-tasks`));
+			let allTasks = flowContext.get(`${node.id}-tasks`).map((task) => {
+				let taskStatus = getTaskStatus(node, task);
 				return {
 					node_name: node.name,
 					name: task.name,
@@ -1921,18 +1976,24 @@ module.exports = function (RED) {
 					isDynamic: task.isDynamic,
 					isStatic: task.isStatic,
 					autostart: task.autostart,
-					expression: task.node_expressionType === 'cron' || task.node_expressionType === ''? task.node_expression: null,
+					expression:
+						task.node_expressionType === "cron" ||
+						task.node_expressionType === ""
+							? task.node_expression
+							: null,
 					expressionType: task.node_expressionType,
-					...taskStatus
+					...taskStatus,
 				};
-			})
-			res.status(200).send(allTasks)
-		}
+			});
+			res.status(200).send(allTasks);
+		};
 
 		const getTaskCallback = (req, res) => {
 			let taskId = req.params.taskId;
-			let task = flowContext.get(`${node.id}-tasks`).find((m) => m.name = taskId);
-			if(task){
+			let task = flowContext
+				.get(`${node.id}-tasks`)
+				.find((m) => (m.name = taskId));
+			if (task) {
 				let taskStatus = getTaskStatus(node, task);
 				res.status(200).send({
 					node_name: node.name,
@@ -1942,14 +2003,18 @@ module.exports = function (RED) {
 					isDynamic: task.isDynamic,
 					isStatic: task.isStatic,
 					autostart: task.autostart,
-					expression: task.node_expressionType === 'cron' || task.node_expressionType === ''? task.node_expression: null,
+					expression:
+						task.node_expressionType === "cron" ||
+						task.node_expressionType === ""
+							? task.node_expression
+							: null,
 					expressionType: task.node_expressionType,
-					...taskStatus
-				}); 
+					...taskStatus,
+				});
 			} else {
 				res.status(404).send({});
 			}
-		}
+		};
 
 		var maxApiRequestSize = RED.settings.apiMaxLength || "5mb";
 		var jsonParser = bodyParser.json({ limit: maxApiRequestSize });
@@ -1979,7 +2044,7 @@ module.exports = function (RED) {
 		);
 
 		RED.httpNode.get(
-			node.endpointUrl+"/staticOptions",
+			node.endpointUrl + "/staticOptions",
 			corsHandler,
 			jsonParser,
 			urlencParser,
@@ -1989,7 +2054,7 @@ module.exports = function (RED) {
 		);
 
 		RED.httpNode.get(
-			node.endpointUrl+"/:taskId",
+			node.endpointUrl + "/:taskId",
 			corsHandler,
 			jsonParser,
 			urlencParser,
@@ -2019,7 +2084,6 @@ module.exports = function (RED) {
 						shape: indicator,
 						text: (node.nextEvent || "Next") + ": " + d,
 					});
-
 				} else if (node.tasks && node.tasks.length) {
 					node.status({ fill: "grey", shape: indicator, text: "All stopped" });
 				} else {
@@ -2325,10 +2389,10 @@ module.exports = function (RED) {
 							break;
 						case "add": //single
 						case "update": //single
-							updateTask(node, cmd, msg, false);
+							updateTask(node, cmd, msg, false, msg.isStatic ? true : false);
 							updateNextStatus(node, true);
 							serialise(); //update persistent
-							updateStaticTasksOnFile();
+							// updateStaticTasksOnFile();
 							break;
 						case "clear":
 						case "remove-": //multiple

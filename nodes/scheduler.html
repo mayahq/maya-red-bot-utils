@@ -52,6 +52,10 @@ copies or substantial portions of the Software.
             period: '<div class="cron-select-period"><label></label><select class="cron-period-select" style="background-color:#474747;"></select></div>',
             startTime: '<div class="cron-input cron-start-time">Start time <select class="cron-clock-hour" style="background-color:#474747;"></select> : <select class="cron-clock-minute" style="background-color:#474747;"></select></div>',
             container: '<div class="cron-input"></div>',
+            seconds: {
+                tag: 'cron-seconds',
+                inputs: ['<p>Every <select class="cron-seconds-select" style="background-color:#474747;"></select> second(s) </p>']
+            },
             minutes: {
                 tag: 'cron-minutes',
                 inputs: [ '<p>Every <select class="cron-minutes-select" style="background-color:#474747;"></select> minutes(s)</p>' ]
@@ -87,7 +91,8 @@ copies or substantial portions of the Software.
             }
         };
     
-        var periodOpts = arrayToOptions(["Minutes", "Hourly", "Daily", "Weekly", "Monthly", "Yearly"]);
+        var periodOpts = arrayToOptions(["Seconds", "Minutes", "Hourly", "Daily", "Weekly", "Monthly", "Yearly"]);
+        var secondsOpts = rangeToOptions(1, 59);
         var minuteOpts = rangeToOptions(1, 59);
         var hourOpts = rangeToOptions(1, 24);
         var dayOpts = rangeToOptions(1, 31);
@@ -141,6 +146,11 @@ copies or substantial portions of the Software.
                 $selector.siblings('div.cron-start-time').show();
                 $selector.siblings('div.cron-start-time').children("select.cron-clock-hour").val('12');
                 switch(period) {
+                    case 'Seconds':
+                        $selector.siblings('div.cron-seconds')
+                            .show()
+                            .find("select.cron-seconds-select").val('1');
+                            break;
                     case 'Minutes':
                         $selector.siblings('div.cron-minutes')
                             .show()
@@ -200,6 +210,10 @@ copies or substantial portions of the Software.
                     .append(periodOpts)
                     .bind("change", eventHandlers.periodSelect);
                 
+                addInputElements(base.$el, cronInputs.seconds, function() {
+                    base.$el.find("select.cron-seconds-select").append(secondsOpts);
+                })
+                
                 addInputElements(base.$el, cronInputs.minutes, function() {
                     base.$el.find("select.cron-minutes-select").append(minuteOpts);
                 });
@@ -250,14 +264,24 @@ copies or substantial portions of the Software.
             
             base.getExpression = function() {
                 //var b = c.data("block");
-                var sec = 0; // ignoring seconds by default
+                //var sec = 0; // ignoring seconds by default
                 var year = "*"; // every year by default
                 var dow = "?";
                 var month = "*", dom = "*";
+                var sec = base.$el.find("select.cron-clock-seconds").val();
                 var min = base.$el.find("select.cron-clock-minute").val();
                 var hour = base.$el.find("select.cron-clock-hour").val();
                 var period = base.$el.find("select.cron-period-select").val();
                 switch (period) {
+                    case 'Seconds': {
+                        let $selector = base.$el.find("div.cron-seconds");
+                        let nsec = $selector.find("select.cron-seconds-select").val();
+                        if(nsec > 1) sec = "0/"+nsec;
+                        else sec = "*"
+                        min = "*";
+                        hour = "*";
+                        break;
+                    }
                     case 'Minutes':
                         {
                             let $selector = base.$el.find("div.cron-minutes");
@@ -884,10 +908,10 @@ copies or substantial portions of the Software.
                 outputField: { value: "payload" },
                 endpointUrl: { value: "" },
                 timeZone: { value: "" },
-                persistTasks: { value: true },
                 wasDeployed: { value: true },
                 commandResponseMsgOutput: { value: "output1" },
                 outputs: { value: 1 },
+                changedAt: {value: ""},
                 options: {
                     value: [{ payload: '', topic: '', expression: '' }], 
                     validate: function(value) { 
@@ -1348,8 +1372,8 @@ copies or substantial portions of the Software.
                             }
                         }   
                     }
-                    option.name = node.id +"#" + (optionIndex + 1);
-                    option.topic = option.topic || `${node.name || 'bot-scheduler'}-#` + (optionIndex + 1);
+                    option.name = option.name || "task" + (optionIndex + 1);
+                    option.topic = option.topic || `${node.name || 'bot-scheduler'}#${optionIndex + 1}`;
                     option.payloadType = option.payloadType || option.type || "default";
                     option.autostart = option.autostart ? true : false
                     delete option.type;                
@@ -1508,7 +1532,7 @@ copies or substantial portions of the Software.
                     }
                     
                     
-                    var container, nameField, topicField, payloadField;
+                    var container, nameField, topicField, payloadField, nameFieldCopy;
                     var expressionTypeField, expressionField, solarEventsField, locationGroup, offsetField;
                     //build options row
                     container = $('<li/>', { style: "margin:0px 0px 5px 0px; padding:0px;" });
@@ -1523,8 +1547,19 @@ copies or substantial portions of the Software.
     
                     //generate the name field                              
                     var nameClass = "node-input-option-name" + ((!option.name || dupCheck[option.name]) ? " input-error" : "");
-                    nameField = $('<label/>', { class: nameClass, type: "text", style: "display:none", placeholder: '', title: "name", value: option.name, disabled: true }).appendTo(div);
+                    nameField = $('<input/>', { class: nameClass, type: "text", style: "margin-left:0px; width:calc(20% - 8px);border-radius:4px 0px 0px 4px;", placeholder: '', title: "task id", value: option.name, disabled: true }).appendTo(div);
                     dupCheck[option.name] = true;
+
+                    nameFieldCopy = $('<button/>', {
+                        title: 'copy task id',
+                        class: 'ui-button', 
+                        style: "margin-left:0px; width:calc(3%);line-height:21px;border-radius:0px 4px 4px 0px;text-align:center;padding-left:5px; padding-right:18px;"
+                    }).appendTo(div);
+
+                    $('<i/>', { 
+                        class: "fa fa-clone", 
+                        'aria-hidden': true
+                    }).appendTo(nameFieldCopy);
     
                     //generate the topic field
                     var topicClass = "node-input-option-topic" + ((!option.topic) ? " input-error" : "");
@@ -1698,7 +1733,13 @@ copies or substantial portions of the Software.
                         } else if (!$(this).val()) {
                             $(this).addClass('input-error');
                         }
-                    });                      
+                    });
+
+                    nameFieldCopy.click(nameField, (selected) => {
+                        console.log(selected.data.val());
+                        navigator.clipboard.writeText(selected.data.val());
+                    })
+                    
                 
                     locationField.change(function() {
                         if ($(this).val() && locationGroup.hasClass("input-error")) {
@@ -1811,6 +1852,7 @@ copies or substantial portions of the Software.
                     cursor: "move"
                 });
                 updateEditorLayout();
+                node.changedAt = new Date();
             },
             oneditsave: function () {
                 var node = this;
@@ -1818,6 +1860,7 @@ copies or substantial portions of the Software.
                 node.options = [];
                 var uniqueId = this.id.split(".").join("-");
                 node.endpointUrl = "/scheduler-" + uniqueId;
+                node.changedAt = new Date();
                 // eslint-disable-next-line no-unused-vars
                 options.each(function(i) {
                     var option = $(this);
@@ -2177,7 +2220,7 @@ copies or substantial portions of the Software.
                     <li>Fan out: Separate outputs for static, dynamic and command messages</li>
                 </ul>
             </div>    
-            <h4>Persist dynamic schedules</h4>
+            <!-- <h4>Persist dynamic schedules</h4>
             <div style="padding-left: 15px">
                 Enabling this option causes dynamic schedules to be saved to file and re-loaded when the bot-scheduler node is loaded or re-deployed. <br>
                 NOTES...
@@ -2185,7 +2228,7 @@ copies or substantial portions of the Software.
                     <li>Any time an update to any dynamic schedule occurs, all dynamic schedules are saved to file</li>
                     <li>The schedules are saved in a directory called <code>botschedulerdata</code> under your node-red folder</li>
                 </ul>
-            </div>    
+            </div>     -->
             <h4>Schedules</h4>
             <div style="padding-left: 15px">
                 A table of schedules. Entries here are considered static and will be reloaded when node-red starts or the bot-scheduler node is (re)deployed.
