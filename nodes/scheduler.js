@@ -528,8 +528,8 @@ function applyOptionDefaults(option, optionIndex, nodeId) {
 			option.expressionType = "cron";
 		}
 	}
-	option.name = option.name || `${nodeId}${optionIndex + 1}`;
-	option.topic = option.topic || `bot-scheduler#${optionIndex + 1}`;
+	option.name = option.name || `${optionIndex + 1}${node.id}`;
+  option.topic = option.topic || `${node.name || 'Task'} ${optionIndex + 1}`;
 	option.payloadType = option.payloadType || option.type || "default";
 	delete option.type;
 	if (option.expressionType == "cron" && !option.expression)

@@ -1372,8 +1372,8 @@ copies or substantial portions of the Software.
                             }
                         }   
                     }
-                    option.name = option.name || "task" + (optionIndex + 1);
-                    option.topic = option.topic || `${node.name || 'bot-scheduler'}#${optionIndex + 1}`;
+                    option.name = option.name || `${optionIndex + 1}${node.id}`;
+                    option.topic = option.topic || `${node.name || 'Task'} ${optionIndex + 1}`;
                     option.payloadType = option.payloadType || option.type || "default";
                     option.autostart = option.autostart ? true : false
                     delete option.type;                
@@ -1547,19 +1547,27 @@ copies or substantial portions of the Software.
     
                     //generate the name field                              
                     var nameClass = "node-input-option-name" + ((!option.name || dupCheck[option.name]) ? " input-error" : "");
-                    nameField = $('<input/>', { class: nameClass, type: "text", style: "margin-left:0px; width:calc(20% - 8px);border-radius:4px 0px 0px 4px;", placeholder: '', title: "task id", value: option.name, disabled: true }).appendTo(div);
+                    nameField = $('<input/>', { 
+                        class: nameClass, 
+                        type: "text", 
+                        style: "margin-left:0px; width:calc(20% - 28px);border-radius:4px 0px 0px 4px;color:#dddddd5c;background-color:#464646", 
+                        placeholder: '', title: "task id", 
+                        value: option.name, 
+                        disabled: true 
+                    }).appendTo(div);
                     dupCheck[option.name] = true;
 
                     nameFieldCopy = $('<button/>', {
                         title: 'copy task id',
                         class: 'ui-button', 
-                        style: "margin-left:0px; width:calc(3%);line-height:21px;border-radius:0px 4px 4px 0px;text-align:center;padding-left:5px; padding-right:18px;"
+                        style: "margin-left:0px; width:65px!important;line-height:21px!important;border-radius:0px 4px 4px 0px;text-align:center;",
                     }).appendTo(div);
+                    nameFieldCopy.append('Copy')
 
-                    $('<i/>', { 
-                        class: "fa fa-clone", 
-                        'aria-hidden': true
-                    }).appendTo(nameFieldCopy);
+                    //$('<i/>', { 
+                    //    class: "fa fa-clone", 
+                    //    'aria-hidden': true
+                    //}).appendTo(nameFieldCopy);
     
                     //generate the topic field
                     var topicClass = "node-input-option-topic" + ((!option.topic) ? " input-error" : "");
@@ -1736,7 +1744,6 @@ copies or substantial portions of the Software.
                     });
 
                     nameFieldCopy.click(nameField, (selected) => {
-                        console.log(selected.data.val());
                         navigator.clipboard.writeText(selected.data.val());
                     })
                     
@@ -1803,7 +1810,18 @@ copies or substantial portions of the Software.
                 $("#node-input-outputField").typedInput({ types: [{ label: "msg.", value: "str" }] });
     
                 $("#node-input-add-option").click(function() {
-                    generateOption($("#node-input-option-container").children().length, {});
+                    if($("#node-input-option-container").children().length){
+                        let c = $("#node-input-option-container").children().slice(-1)[0];
+                        let lastTaskId = c.children[0].getElementsByClassName('node-input-option-name')[0].value;                       
+                        let newIndex = lastTaskId.split('-').slice(-1)[0];
+                        if(/^-?\d+$/.test(newIndex)){
+                            generateOption(parseInt(newIndex), {});
+                        } else {
+                            generateOption($("#node-input-option-container").children().length, {});
+                        }
+                    } else {
+                        generateOption($("#node-input-option-container").children().length, {}); 
+                    }
                     $("#node-input-option-container-div").scrollTop($("#node-input-option-container-div").get(0).scrollHeight);
                 });
     
@@ -1833,7 +1851,6 @@ copies or substantial portions of the Software.
                         }
                     },
                     error: function(err) {
-                        console.log(err);
                         for (var i = 0; i < tmp.length; i++) {
                             var option = tmp[i];
                             try {
