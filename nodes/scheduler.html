@@ -1372,7 +1372,7 @@ copies or substantial portions of the Software.
                             }
                         }   
                     }
-                    option.name = option.name || `${optionIndex + 1}${node.id}`;
+                    option.name = option.name || `${optionIndex + 1}-${node.id}`;
                     option.topic = option.topic || `${node.name || 'Task'} ${optionIndex + 1}`;
                     option.payloadType = option.payloadType || option.type || "default";
                     option.autostart = option.autostart ? true : false

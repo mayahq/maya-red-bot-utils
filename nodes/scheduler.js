@@ -24,6 +24,7 @@ const fs = require("fs");
 var cors = require("cors");
 var bodyParser = require("body-parser");
 var getBody = require("raw-body");
+const lodash = require("lodash");
 
 SunCalc.addTime(-18, "nightEnd", "nightStart");
 SunCalc.addTime(-6, "civilDawn", "civilDusk");
@@ -528,10 +529,13 @@ function applyOptionDefaults(option, optionIndex, nodeId) {
 			option.expressionType = "cron";
 		}
 	}
-	option.name = option.name || `${optionIndex + 1}${node.id}`;
+	option.name = option.name || `${optionIndex + 1}-${node.id}`;
   option.topic = option.topic || `${node.name || 'Task'} ${optionIndex + 1}`;
 	option.payloadType = option.payloadType || option.type || "default";
-	delete option.type;
+	option.payload = option.payload || "";
+	option.isStatic = option.scheduleType || option.isStatic || true;
+	option.autostart = option.autostart || false;
+	// delete option.type;
 	if (option.expressionType == "cron" && !option.expression)
 		option.expression = "0 * * * * * *";
 	if (!option.solarType)
@@ -1094,8 +1098,8 @@ module.exports = function (RED) {
 	function BotEvents(config) {
 		RED.nodes.createNode(this, config);
 		var node = this;
-		var flowContext = this.context().flow;
-		flowContext.set(`${node.id}-tasks`, []);
+		// var flowContext = this.context().flow;
+		// flowContext.set(`${node.id}-tasks`, []);
 		node.name = config.name;
 		node.payloadType = config.payloadType || config.type || "default";
 		delete config.type;
@@ -1625,7 +1629,7 @@ module.exports = function (RED) {
 			task.autostart = opt.autostart;
 			task.isDynamic = !static;
 			task.isStatic = static;
-			task.name = "" + opt.name;
+			task.name = opt.name;
 			task.node_topic = opt.topic;
 			task.node_expressionType = opt.expressionType;
 			task.node_expression = opt.expression;
@@ -1686,7 +1690,7 @@ module.exports = function (RED) {
 				});
 			let t = getTask(node, opt.name);
 			if (t) {
-				deleteTask(node, t.name);
+				deleteTask(node, opt.name);
 			}
 			if (static) {
 				if (!opt.autostart) {
@@ -1699,14 +1703,14 @@ module.exports = function (RED) {
 					task.stop(); //prevent bug where calling start without first calling stop causes events to bunch up
 					task.start();
 				}
-				node.tasks.push(task);
-				flowContext.set(`${node.id}-tasks`, node.tasks);
+				node.tasks.push(task);				
+				// flowContext.set(`${node.id}-tasks`, lodash.sortBy(node.tasks, function(obj){ return obj.name}));
 				return task;
 			} else {
 				task.stop(); //prevent bug where calling start without first calling stop causes events to bunch up
 				task.start();
 				node.tasks.push(task);
-				flowContext.set(`${node.id}-tasks`, node.tasks);
+				// flowContext.set(`${node.id}-tasks`, lodash.sortBy(node.tasks, function(obj){ return obj.name}));
 				return task;
 			}
 		}
@@ -1966,7 +1970,8 @@ module.exports = function (RED) {
 
 		const getcallback = (req, res) => {
 			// console.log(flowContext.get(`${node.id}-tasks`));
-			let allTasks = flowContext.get(`${node.id}-tasks`).map((task) => {
+			let allTasks = getStaticTasksFromFile().schedules.map((t) => {
+				let task = getTask(node, t.name);
 				let taskStatus = getTaskStatus(node, task);
 				return {
 					node_name: node.name,
@@ -1985,34 +1990,46 @@ module.exports = function (RED) {
 					...taskStatus,
 				};
 			});
-			res.status(200).send(allTasks);
+			if(allTasks.length && allTasks[0].expression){
+				res.status(200).send(lodash.sortBy(allTasks, function(obj) { return obj.name}));
+			} else {
+				res.status(404).send([]);
+			}
 		};
 
 		const getTaskCallback = (req, res) => {
-			let taskId = req.params.taskId;
-			let task = flowContext
-				.get(`${node.id}-tasks`)
-				.find((m) => (m.name = taskId));
-			if (task) {
-				let taskStatus = getTaskStatus(node, task);
-				res.status(200).send({
-					node_name: node.name,
-					name: task.name,
-					topic: task.node_topic,
-					node: node.id,
-					isDynamic: task.isDynamic,
-					isStatic: task.isStatic,
-					autostart: task.autostart,
-					expression:
-						task.node_expressionType === "cron" ||
-						task.node_expressionType === ""
-							? task.node_expression
-							: null,
-					expressionType: task.node_expressionType,
-					...taskStatus,
-				});
-			} else {
-				res.status(404).send({});
+			try {
+				let taskId = req.params.taskId;
+				let t = getStaticTasksFromFile().schedules
+				.find((m) => (m.name === taskId));
+				if(t && t.expression){
+					let task = getTask(node, t.name);
+					if (task) {
+						let taskStatus = getTaskStatus(node, task);
+						res.status(200).send({
+							node_name: node.name,
+							name: task.name,
+							topic: task.node_topic,
+							node: node.id,
+							isDynamic: task.isDynamic,
+							isStatic: task.isStatic,
+							autostart: task.autostart,
+							expression:
+								task.node_expressionType === "cron" ||
+								task.node_expressionType === ""
+									? task.node_expression
+									: null,
+							expressionType: task.node_expressionType,
+							...taskStatus,
+						});
+					} else {
+						return res.status(404).send({});
+					}
+				} else {
+					return res.status(404).send({});
+				}
+			} catch(err) {
+				return res.status(500).send(err);
 			}
 		};
 
@@ -2237,6 +2254,7 @@ module.exports = function (RED) {
 				var sendCommandResponse = function (msg) {
 					send(generateSendMsg(node, msg, "command-response"));
 				};
+				
 				for (let i = 0; i < input.length; i++) {
 					let cmd = input[i];
 					let action = cmd.command || "";
