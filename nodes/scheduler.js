@@ -1098,8 +1098,8 @@ module.exports = function (RED) {
 	function BotEvents(config) {
 		RED.nodes.createNode(this, config);
 		var node = this;
-		// var flowContext = this.context().flow;
-		// flowContext.set(`${node.id}-tasks`, []);
+		var flowContext = this.context().flow;
+		flowContext.set(`${node.id}-tasks`, []);
 		node.name = config.name;
 		node.payloadType = config.payloadType || config.type || "default";
 		delete config.type;
@@ -1543,6 +1543,7 @@ module.exports = function (RED) {
 				}
 			}
 
+			let staticSchedulesList = getStaticTasksFromFile().schedules;
 			for (let index = 0; index < options.length; index++) {
 				let opt = options[index];
 				let task = getTask(node, opt.name);
@@ -1550,7 +1551,6 @@ module.exports = function (RED) {
 				let isStatic = static;
 				let opCount = 0,
 				modified = false;
-				let staticSchedulesList = getStaticTasksFromFile().schedules;
 				if (task) {
 					modified = true;
 					opCount = task.node_count || 0;
@@ -1564,27 +1564,32 @@ module.exports = function (RED) {
 						let t = staticSchedulesList.findIndex((stat) => stat.name === opt.name);
 						applyOptionDefaults(opt, t, node.id);
 						staticSchedulesList[t] = opt;
-						updateStaticTasksOnFile(staticSchedulesList);
+						// updateStaticTasksOnFile(staticSchedulesList);
 					}
 				} else {
 					let t = staticSchedulesList.find((stat) => stat.name === opt.name);
 					if(t){
 						staticSchedulesList.forEach((stat, i) => {
-							this[i] = opt;
-							applyOptionDefaults(this[i], i, node.id);
-              staticSchedulesList[i] = this[i];
+							if(stat.name === opt.name) {
+								this[i] = opt;
+								applyOptionDefaults(this[i], i, node.id);
+								staticSchedulesList[i] = this[i];
+								createTask(node, this[i], i, true, false);
+							}
 						});
-						updateStaticTasksOnFile(staticSchedulesList);
+						// updateStaticTasksOnFile(staticSchedulesList);
 					} else {
 						applyOptionDefaults(opt, staticSchedulesList.length - 1, node.id);
-						if(staticSchedulesList.length && !staticSchedulesList[0].expression) {
-							staticSchedulesList.pop();
-						} 
+						// if(staticSchedulesList.length && !staticSchedulesList[0].expression) {
+						// 	staticSchedulesList.pop();
+						// } 
 						staticSchedulesList.push(opt);
-						updateStaticTasksOnFile(staticSchedulesList);
+						createTask(node, this[i], i, true, false);
+						// updateStaticTasksOnFile(staticSchedulesList);
 					}
 				}
 			}
+			updateStaticTasksOnFile(staticSchedulesList);
 		}
 
 		function createTask(node, opt, index, static = true, isRedeploy = true) {
@@ -1704,13 +1709,13 @@ module.exports = function (RED) {
 					task.start();
 				}
 				node.tasks.push(task);				
-				// flowContext.set(`${node.id}-tasks`, lodash.sortBy(node.tasks, function(obj){ return obj.name}));
+				flowContext.set(`${node.id}-tasks`, node.tasks);
 				return task;
 			} else {
 				task.stop(); //prevent bug where calling start without first calling stop causes events to bunch up
 				task.start();
 				node.tasks.push(task);
-				// flowContext.set(`${node.id}-tasks`, lodash.sortBy(node.tasks, function(obj){ return obj.name}));
+				flowContext.set(`${node.id}-tasks`, node.tasks);
 				return task;
 			}
 		}
@@ -1777,7 +1782,7 @@ module.exports = function (RED) {
 					version: 1,
 					schedules: options?.length ? options : newOpts || [],
 				};
-				let fileData = JSON.stringify(data);
+				let fileData = JSON.stringify(data, null, 2);
 				fs.writeFileSync(filePath, fileData);
 			} catch (e) {
 				RED.log.error(
@@ -1818,7 +1823,7 @@ module.exports = function (RED) {
 					schedules: dynNodesExp,
 					staticSchedules: statTaskExp,
 				};
-				let fileData = JSON.stringify(data);
+				let fileData = JSON.stringify(data, null, 2);
 				fs.writeFileSync(filePath, fileData);
 			} catch (e) {
 				RED.log.error(
@@ -1970,40 +1975,45 @@ module.exports = function (RED) {
 
 		const getcallback = (req, res) => {
 			// console.log(flowContext.get(`${node.id}-tasks`));
-			let allTasks = getStaticTasksFromFile().schedules.map((t) => {
-				let task = getTask(node, t.name);
-				let taskStatus = getTaskStatus(node, task);
-				return {
-					node_name: node.name,
-					name: task.name,
-					topic: task.node_topic,
-					node: node.id,
-					isDynamic: task.isDynamic,
-					isStatic: task.isStatic,
-					autostart: task.autostart,
-					expression:
-						task.node_expressionType === "cron" ||
-						task.node_expressionType === ""
-							? task.node_expression
-							: null,
-					expressionType: task.node_expressionType,
-					...taskStatus,
-				};
-			});
-			if(allTasks.length && allTasks[0].expression){
-				res.status(200).send(lodash.sortBy(allTasks, function(obj) { return obj.name}));
-			} else {
-				res.status(404).send([]);
+			try{
+				let allTasks = flowContext.get(`${node.id}-tasks`).map((task) => {
+					// let task = getTask(node, t.name);
+					let taskStatus = getTaskStatus(node, task);
+					return {
+						node_name: node.name,
+						name: task.name,
+						topic: task.node_topic,
+						node: node.id,
+						isDynamic: task.isDynamic,
+						isStatic: task.isStatic,
+						autostart: task.autostart,
+						expression:
+							task.node_expressionType === "cron" ||
+							task.node_expressionType === ""
+								? task.node_expression
+								: null,
+						expressionType: task.node_expressionType,
+						...taskStatus,
+					};
+				});
+				if(allTasks.length && allTasks[0].expression){
+					res.status(200).send(lodash.sortBy(allTasks, function(obj) { return obj.name}));
+				} else {
+					res.status(404).send([]);
+				}
+			} catch (err) {
+				console.log(err);
+				return res.status(500).send(err);
 			}
 		};
 
 		const getTaskCallback = (req, res) => {
 			try {
 				let taskId = req.params.taskId;
-				let t = getStaticTasksFromFile().schedules
+				let task = flowContext.get(`${node.id}-tasks`)
 				.find((m) => (m.name === taskId));
-				if(t && t.expression){
-					let task = getTask(node, t.name);
+				if(task && task.expression){
+					// let task = getTask(node, t.name);
 					if (task) {
 						let taskStatus = getTaskStatus(node, task);
 						res.status(200).send({
