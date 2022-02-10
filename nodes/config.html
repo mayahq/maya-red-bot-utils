@@ -141,7 +141,7 @@
             function createPropertyValue(row2_1, row2_2, defaultType) {
                 var propValInput = $('<input/>',{class:"node-input-rule-property-value",type:"text"})
                     .appendTo(row2_1)
-                    .typedInput({default:defaultType||'str',types:['msg','flow','global','str','num','bool','json','bin','date','jsonata','env']});
+                    .typedInput({default:defaultType||'str',types:['str','num','bool','json','bin']});
 
                 var dcLabel = $('<label style="padding-left: 130px;"></label>').appendTo(row2_2);
                 var deepCopy = $('<input type="checkbox" class="node-input-rule-property-deepCopy" style="width: auto; margin: 0 6px 0 0">').appendTo(dcLabel)
@@ -205,12 +205,16 @@
                         selectField.append($("<option></option>").val(selectOptions[i].v).text(selectOptions[i].l));
                     }
 
+                    $('<div/>',{style:"display:flex;text-align:center; width:40px; box-sizing:border-box;justify-content : center;align-items : center;"})
+                        .text("set")
+                        .appendTo(row2);
+
                     var propertyName = $('<input/>',{class:"node-input-rule-property-name",type:"text"})
                         .appendTo(row2)
-                        .typedInput({types:['msg','flow','global']});
+                        .typedInput({types:['flow','global']});
 
                     var row2_1 = $('<div/>', {style:"display:flex;align-items: baseline"}).appendTo(row2);
-                    $('<div/>',{style:"display:inline-block;text-align:center; width:60px; padding-right:10px; padding-left:10px;box-sizing:border-box;"})
+                    $('<div/>',{style:"display:inline-block;text-align:center; width:40px; padding-right:10px; padding-left:10px;box-sizing:border-box;"})
                         .text(toValueLabel)
                         .appendTo(row2_1);
 
