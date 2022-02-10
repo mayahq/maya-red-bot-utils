@@ -35,7 +35,7 @@
         category: 'botutils',
         defaults: {
             name: {value:""},
-            rules:{value:[{t:"set",p:"payload",pt:"msg",to:"",tot:"str"}],validate: function(rules) {
+            rules:{value:[{t:"set",p:"payload",pt:"msg",to:"",tot:"str", varName: "", varDesc: "", reqd: false, exportVar: false}],validate: function(rules) {
                 if (!rules || rules.length === 0) { return true }
                 for (var i=0;i<rules.length;i++) {
                     var r = rules[i];
@@ -211,12 +211,12 @@
                     var varDesc = $('<input/>',{class:"node-input-rule-varDesc", style:"margin-left:10px; , width:90%;", type:"text", title: "description", placeholder: "description", value: rule.varDesc})
                         .appendTo(row1)
                     var reqdBox = $('<div/>',{style:"display:flex;"})
-                    var reqd = $('<input/>', {class: "node-input-rule-reqd", type: "checkbox", title: "required", label: "required", value: rule.reqd})
+                    var reqd = $('<input/>', {class: "node-input-rule-reqd", type: "checkbox", title: "required", label: "required", checked: rule.reqd})
                         .appendTo(reqdBox);
                     $('<label for="node-input-rule-reqd">required</label>').appendTo(reqdBox);
                     reqdBox.appendTo(row1)
                     var exportBox = $('<div/>',{style:"display:flex;"})
-                    var exportVar = $('<input/>', {class: "node-input-rule-exportVar", type: "checkbox", title: "export", label: "export", value: rule.exportVar})
+                    var exportVar = $('<input/>', {class: "node-input-rule-exportVar", type: "checkbox", title: "export", label: "export", checked: rule.exportVar})
                         .appendTo(exportBox);
                     $('<label for="node-input-rule-exportVar">export</label>').appendTo(exportBox);
                     exportBox.appendTo(row1)
@@ -370,15 +370,14 @@
             rules.each(function(i) {
                 var rule = $(this);
                 var type = "set"
-                console.log("THIS IS TYPE", type);
                 var r = {
                     t:type,
                     p:rule.find(".node-input-rule-property-name").typedInput('value'),
                     pt:rule.find(".node-input-rule-property-name").typedInput('type'),
                     varName : rule.find(".node-input-rule-varName").val(),
                     varDesc : rule.find(".node-input-rule-varDesc").val(),
-                    reqd : rule.find(".node-input-rule-reqd").val(),
-                    exportVar : rule.find(".node-input-rule-exportVar").val()
+                    reqd : rule.find(".node-input-rule-reqd").prop('checked') ? true : false,
+                    exportVar : rule.find(".node-input-rule-exportVar").prop('checked') ? true: false
                 };
                 if (type === "set") {
                     r.to = rule.find(".node-input-rule-property-value").typedInput('value');

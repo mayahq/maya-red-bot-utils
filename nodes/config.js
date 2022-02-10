@@ -42,6 +42,10 @@
         var valid = true;
         for (var i=0;i<this.rules.length;i++) {
             rule = this.rules[i];
+            rule['varName'] = rule.varName || ""
+            rule["varDesc"] = rule.varDesc || ""
+            rule["reqd"] = rule.reqd || false
+            rule["exportVar"] = rule.exportVar || false
             // Migrate to type-aware rules
             if (!rule.pt) {
                 rule.pt = "msg";
