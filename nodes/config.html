@@ -116,6 +116,7 @@
             return this.name ? "node_label_italic" : "";
         },
         oneditprepare: function() {
+            var node = this;
             var set = "Set"
             var change = "Change";
             var del = "Delete";
@@ -199,11 +200,22 @@
                     var row3 = $('<div/>',{style:"margin-top:8px;"}).appendTo(fragment);
                     var row4 = $('<div/>',{style:"display:flex;margin-top:8px;align-items: baseline"}).appendTo(fragment);
 
-                    var selectField = $('<select/>',{class:"node-input-rule-type",style:"width:110px; margin-right:10px; visibility : hidden;"}).appendTo(row1);
+                    var selectField = $('<select/>',{class:"node-input-rule-type",style:"width:110px; margin-right:10px; visibility : hidden;"});
                     var selectOptions = [{v:"set",l:set},{v:"change",l:change},{v:"delete",l:del},{v:"move",l:move}];
                     for (var i=0; i<4; i++) {
                         selectField.append($("<option></option>").val(selectOptions[i].v).text(selectOptions[i].l));
                     }
+
+                    var varName = $('<input/>',{class:"node-input-rule-varName",type:"text", title: "variable name", placeholder: "variable name", value: rule.varName})
+                        .appendTo(row1)
+                    var varDesc = $('<input/>',{class:"node-input-rule-varDesc",type:"text", title: "description", placeholder: "description", value: rule.varDesc})
+                        .appendTo(row1)
+                    var reqd = $('<input/>', {class: "node-input-rule-reqd", type: "checkbox", title: "required", label: "required", value: rule.reqd})
+                        .appendTo(row1);
+                    $('<label for="node-input-rule-reqd">required</label>').appendTo(row1);
+                    var exportVar = $('<input/>', {class: "node-input-rule-exportVar", type: "checkbox", title: "export", label: "export", value: rule.exportVar})
+                        .appendTo(row1);
+                    $('<label for="node-input-rule-exportVar">export</label>').appendTo(row1);
 
                     $('<div/>',{style:"display:flex;text-align:center; width:40px; box-sizing:border-box;justify-content : center;align-items : center;"})
                         .text("set")
@@ -354,11 +366,16 @@
             node.rules= [];
             rules.each(function(i) {
                 var rule = $(this);
-                var type = rule.find(".node-input-rule-type").val();
+                var type = "set"
+                console.log("THIS IS TYPE", type);
                 var r = {
                     t:type,
                     p:rule.find(".node-input-rule-property-name").typedInput('value'),
-                    pt:rule.find(".node-input-rule-property-name").typedInput('type')
+                    pt:rule.find(".node-input-rule-property-name").typedInput('type'),
+                    varName : rule.find(".node-input-rule-varName").val(),
+                    varDesc : rule.find(".node-input-rule-varDesc").val(),
+                    reqd : rule.find(".node-input-rule-reqd").val(),
+                    exportVar : rule.find(".node-input-rule-exportVar").val()
                 };
                 if (type === "set") {
                     r.to = rule.find(".node-input-rule-property-value").typedInput('value');
