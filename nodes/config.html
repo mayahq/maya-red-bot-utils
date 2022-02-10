@@ -62,8 +62,8 @@
             to: {value:""},
             reg: {value:false}
         },
-        inputs: 1,
-        outputs: 1,
+        inputs: 0,
+        outputs: 0,
         icon: "swap.svg",
         label: function() {
             if (this.name) {
@@ -211,7 +211,7 @@
 
                     var propertyName = $('<input/>',{class:"node-input-rule-property-name",type:"text"})
                         .appendTo(row2)
-                        .typedInput({types:['flow','global']});
+                        .typedInput({types:['flow']});
 
                     var row2_1 = $('<div/>', {style:"display:flex;align-items: baseline"}).appendTo(row2);
                     $('<div/>',{style:"display:inline-block;text-align:center; width:40px; padding-right:10px; padding-left:10px;box-sizing:border-box;"})
