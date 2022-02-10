@@ -28,7 +28,8 @@
       "bot-custom-search": "nodes/custom-search.js",
       "bot-custom-search-response": "nodes/custom-search-response.js",
       "bot-events": "nodes/scheduler.js",
-      "bot-info": "nodes/info.js"
+      "bot-info": "nodes/info.js",
+      "bot-config": "nodes/config.js"
     }
   },
   "dependencies": {
