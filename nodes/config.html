@@ -206,17 +206,20 @@
                         selectField.append($("<option></option>").val(selectOptions[i].v).text(selectOptions[i].l));
                     }
 
-                    var varName = $('<input/>',{class:"node-input-rule-varName",type:"text", title: "variable name", placeholder: "variable name", value: rule.varName})
+                    var varName = $('<input/>',{class:"node-input-rule-varName",style:"margin-left:10px;width:70%;",type:"text", title: "variable name", placeholder: "variable name", value: rule.varName})
                         .appendTo(row1)
-                    var varDesc = $('<input/>',{class:"node-input-rule-varDesc",type:"text", title: "description", placeholder: "description", value: rule.varDesc})
+                    var varDesc = $('<input/>',{class:"node-input-rule-varDesc", style:"margin-left:10px; , width:90%;", type:"text", title: "description", placeholder: "description", value: rule.varDesc})
                         .appendTo(row1)
+                    var reqdBox = $('<div/>',{style:"display:flex;"})
                     var reqd = $('<input/>', {class: "node-input-rule-reqd", type: "checkbox", title: "required", label: "required", value: rule.reqd})
-                        .appendTo(row1);
-                    $('<label for="node-input-rule-reqd">required</label>').appendTo(row1);
+                        .appendTo(reqdBox);
+                    $('<label for="node-input-rule-reqd">required</label>').appendTo(reqdBox);
+                    reqdBox.appendTo(row1)
+                    var exportBox = $('<div/>',{style:"display:flex;"})
                     var exportVar = $('<input/>', {class: "node-input-rule-exportVar", type: "checkbox", title: "export", label: "export", value: rule.exportVar})
-                        .appendTo(row1);
-                    $('<label for="node-input-rule-exportVar">export</label>').appendTo(row1);
-
+                        .appendTo(exportBox);
+                    $('<label for="node-input-rule-exportVar">export</label>').appendTo(exportBox);
+                    exportBox.appendTo(row1)
                     $('<div/>',{style:"display:flex;text-align:center; width:40px; box-sizing:border-box;justify-content : center;align-items : center;"})
                         .text("set")
                         .appendTo(row2);
