@@ -14,6 +14,7 @@
     <div class="form-row node-input-rule-container-row">
         <ol id="node-input-rule-container"></ol>
     </div>
+    <div id="node-input-tip" class="form-tips"><span >Make sure you dont assign multiple values to the same flow key to avoid conflicts.</span></div>
 </script>
 
 <script type="text/javascript">
@@ -71,12 +72,12 @@
             }
 
             if (!this.rules) {
-                return "config : "+"0 variables set"
+                return "<Configure "+"0 Variables Here>"
             } else {
                 if (this.rules.length == 1) {
-                    return "config : " + "1 variable set"
+                    return "<Configure " + "1 Variable Here>"
                 } else {
-                    return "config : " + this.rules.length + " variables set"
+                    return "<Configure " + this.rules.length + " Variables Here>"
                 }
 
             }
@@ -213,12 +214,12 @@
                     var reqdBox = $('<div/>',{style:"display:flex;"})
                     var reqd = $('<input/>', {class: "node-input-rule-reqd", type: "checkbox", title: "required", label: "required", checked: rule.reqd})
                         .appendTo(reqdBox);
-                    $('<label for="node-input-rule-reqd">required</label>').appendTo(reqdBox);
+                    $('<label for="node-input-rule-reqd">required?</label>').appendTo(reqdBox);
                     reqdBox.appendTo(row1)
                     var exportBox = $('<div/>',{style:"display:flex;"})
                     var exportVar = $('<input/>', {class: "node-input-rule-exportVar", type: "checkbox", title: "export", label: "export", checked: rule.exportVar})
                         .appendTo(exportBox);
-                    $('<label for="node-input-rule-exportVar">export</label>').appendTo(exportBox);
+                    $('<label for="node-input-rule-exportVar">export?</label>').appendTo(exportBox);
                     exportBox.appendTo(row1)
                     $('<div/>',{style:"display:flex;text-align:center; width:40px; box-sizing:border-box;justify-content : center;align-items : center;"})
                         .text("set")
@@ -410,4 +411,46 @@
         }
     });
 })();
+</script>
+
+<script type="text/html" data-help-name="bot-config">
+	<h2 data-type="description-title">Description</h2>
+  <p data-type="description-summary">This is a comment-type node and hence has no inputs or outputs. You can add global variables here that can be re-configured and made available to the rest of the flow (like filenames, API keys, links).</p>
+	<h2>Config</h2>
+    <dl class="message-properties">
+					<dt>
+						<span class="property-name">Variable name</span>
+						<span class="property-type">string</span>
+				</dt>
+				<dd>Name of the variable as it should appear to the user, e.g. "CSV Filepath"</dd>
+        <dt>
+            <span class="property-name">Description</span>
+            <span class="property-type">string</span>
+        </dt>
+        <dd>Optional short description of why it is needed. e.g. "To store data in CSV format."</dd>
+
+        <dt class="optional">
+            <span class="property-name">Required?</span>
+            <span class="property-type">boolean</span>
+        </dt>
+        <dd>Whether this is compulsory or not for the workflow to work properly. Defaults to false, i.e. not required</dd>
+
+				<dt>
+					<span class="property-name">Export?</span>
+					<span class="property-type">boolean</span>
+				</dt>
+				<dd>Whether this property should be exported or not while sharing. could be used to prevent accidental exporting and sharing of sensitive data. defaults to false, i.e. not exported.</dd>
+
+				<dt>
+					<span class="property-name">Flow Variable</span>
+					<span class="property-type">string</span>
+			</dt>
+			<dd>Key at which the variable value should be set. defaults to flow.payload. can be accessed anywhere in the flow using flow context.</dd>
+
+			<dt>
+				<span class="property-name">Value</span>
+				<span class="property-type">string</span>
+			</dt>
+			<dd>what value should be set and the type validation for it.</dd>
+    </dl>
 </script>
