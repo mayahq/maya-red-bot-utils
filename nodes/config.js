@@ -341,17 +341,22 @@
         }
 
         if (valid) {
-            this.on('input', function(msg, send, done) {
-                applyRules(msg, 0, (err,msg) => {
-                    if (err) {
-                        done(err);
-                    } else if (msg) {
-                        send(msg);
-                        done();
-                    }
-                })
-            });
+            console.log("Applying Rules.")
+            applyRules({}, 0, ()=>{})
         }
+
+        // if (valid) {
+        //     this.on('input', function(msg, send, done) {
+        //         applyRules(msg, 0, (err,msg) => {
+        //             if (err) {
+        //                 done(err);
+        //             } else if (msg) {
+        //                 send(msg);
+        //                 done();
+        //             }
+        //         })
+        //     });
+        // }
     }
     RED.nodes.registerType("bot-config", BotConfig);
 };
