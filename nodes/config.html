@@ -71,12 +71,12 @@
             }
 
             if (!this.rules) {
-                return "0 variables set"
+                return "config : "+"0 variables set"
             } else {
                 if (this.rules.length == 1) {
-                    return "1 variable set"
+                    return "config : " + "1 variable set"
                 } else {
-                    return this.rules.length + "variables set"
+                    return "config : " + this.rules.length + " variables set"
                 }
 
             }
@@ -121,7 +121,7 @@
             var del = "Delete";
             var move = "Move";
             var to = "To";
-            var toValueLabel = "to the value";
+            var toValueLabel = "to";
             var search = "Search for";
             var replace = "Replace with";
             var regex = "Use regular expressions";
@@ -195,22 +195,22 @@
                     });
                     let fragment = document.createDocumentFragment();
                     var row1 = $('<div/>',{style:"display:flex; align-items: baseline"}).appendTo(fragment);
-                    var row2 = $('<div/>',{style:"margin-top:8px;"}).appendTo(fragment);
+                    var row2 = $('<div/>',{style:"margin-top:8px; display: flex;"}).appendTo(fragment);
                     var row3 = $('<div/>',{style:"margin-top:8px;"}).appendTo(fragment);
                     var row4 = $('<div/>',{style:"display:flex;margin-top:8px;align-items: baseline"}).appendTo(fragment);
 
-                    var selectField = $('<select/>',{class:"node-input-rule-type",style:"width:110px; margin-right:10px;"}).appendTo(row1);
+                    var selectField = $('<select/>',{class:"node-input-rule-type",style:"width:110px; margin-right:10px; visibility : hidden;"}).appendTo(row1);
                     var selectOptions = [{v:"set",l:set},{v:"change",l:change},{v:"delete",l:del},{v:"move",l:move}];
                     for (var i=0; i<4; i++) {
                         selectField.append($("<option></option>").val(selectOptions[i].v).text(selectOptions[i].l));
                     }
 
                     var propertyName = $('<input/>',{class:"node-input-rule-property-name",type:"text"})
-                        .appendTo(row1)
+                        .appendTo(row2)
                         .typedInput({types:['msg','flow','global']});
 
                     var row2_1 = $('<div/>', {style:"display:flex;align-items: baseline"}).appendTo(row2);
-                    $('<div/>',{style:"display:inline-block;text-align:right; width:120px; padding-right:10px; box-sizing:border-box;"})
+                    $('<div/>',{style:"display:inline-block;text-align:center; width:60px; padding-right:10px; padding-left:10px;box-sizing:border-box;"})
                         .text(toValueLabel)
                         .appendTo(row2_1);
 
