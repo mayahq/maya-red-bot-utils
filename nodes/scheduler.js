@@ -2012,7 +2012,7 @@ module.exports = function (RED) {
 				let taskId = req.params.taskId;
 				let task = flowContext.get(`${node.id}-tasks`)
 				.find((m) => (m.name === taskId));
-				if(task && task.expression){
+				if(task && task.node_expression){
 					// let task = getTask(node, t.name);
 					if (task) {
 						let taskStatus = getTaskStatus(node, task);
