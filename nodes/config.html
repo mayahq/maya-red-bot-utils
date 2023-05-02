@@ -79,10 +79,10 @@
 						for (var i = 0; i < rules.length; i++) {
 							var r = rules[i];
 							if (r.reqd) {
-								if (r.varName && r.varDesc) {
+								if (r.varName) {
 									if (r.t === "set") {
 										if (
-											!validateProperty(r.p, r.pt) ||
+											!validateProperty(r.p, r.pt) &&
 											!validateProperty(r.to, r.tot)
 										) {
 											return false;
@@ -652,8 +652,8 @@
 			<span class="property-type">string</span>
 		</dt>
 		<dd>
-			Key at which the variable value should be set. Defaults to flow.payload.
-			Can be accessed anywhere in the flow using flow context.
+			Key at which the variable value should be set. Defaults to global.payload.
+			Can be accessed anywhere in the program using global context.
 		</dd>
 
 		<dt>
