@@ -50,6 +50,8 @@
 				} catch (e) {
 					return false;
 				}
+			} else if (!v){
+				return false
 			}
 			return true;
 		}
@@ -79,11 +81,11 @@
 						for (var i = 0; i < rules.length; i++) {
 							var r = rules[i];
 							if (r.reqd) {
-								if (r.varName) {
+								if (r.varName && r.varDesc) {
 									if (r.t === "set") {
 										if (
-											!validateProperty(r.p, r.pt) &&
-											!validateProperty(r.to, r.tot) && r.to === ""
+											!validateProperty(r.p, r.pt) ||
+											!validateProperty(r.to, r.tot)
 										) {
 											return false;
 										}
