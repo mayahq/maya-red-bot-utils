@@ -83,7 +83,7 @@
 									if (r.t === "set") {
 										if (
 											!validateProperty(r.p, r.pt) &&
-											!validateProperty(r.to, r.tot)
+											!validateProperty(r.to, r.tot) && r.to
 										) {
 											return false;
 										}
